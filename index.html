@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>GCR Food Products Trading — Logistics Operations</title>
 
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Leaflet Turn-by-Turn Routing Engine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
   <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
+  <!-- Clean Corporate Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -59,21 +63,11 @@
       border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    /* Routing Turn Box Styling */
+    /* Completely suppress Leaflet Routing itinerary container overlay */
     .leaflet-routing-container {
-      background: rgba(13, 21, 32, 0.94) !important;
-      backdrop-filter: blur(14px) !important;
-      color: #cbd5e1 !important;
-      border: 1px solid rgba(74, 173, 227, 0.25) !important;
-      border-radius: 0.75rem !important;
-      font-size: 11px !important;
-      max-height: 180px;
-      max-width: 280px;
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5) !important;
-      z-index: 990 !important;
+      display: none !important;
+      visibility: hidden !important;
     }
-    .leaflet-routing-alt { border-color: rgba(255, 255, 255, 0.08) !important; }
-    .leaflet-routing-alt tr:hover { background: rgba(74, 173, 227, 0.12) !important; }
 
     /* Nav Drawer */
     #nav-drawer {
@@ -106,6 +100,7 @@
 </head>
 <body class="text-slate-200 flex flex-col font-sans h-full overflow-x-hidden">
 
+  <!-- APP BAR -->
   <header class="border-b border-white/[0.08] ui-panel px-3 sm:px-5 py-2.5 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center gap-3">
       <button 
@@ -133,14 +128,15 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <button id="header-admin-btn" onclick="openAdminGate()" class="text-xs bg-gcr/15 hover:bg-gcr/25 border border-gcr/30 px-3 py-1.5 rounded-lg font-semibold text-gcr transition flex items-center gap-1.5 cursor-pointer">
+      <!-- Admin Portal Trigger Button -->
+      <button id="header-admin-btn" onclick="openAdminGate()" type="button" class="text-xs bg-gcr/15 hover:bg-gcr/25 border border-gcr/30 px-3 py-1.5 rounded-lg font-semibold text-gcr transition flex items-center gap-1.5 cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
         </svg>
         <span id="header-admin-label">Admin Portal</span>
       </button>
 
-      <button id="header-auth-btn" onclick="navigatePage('page-driver-login', 'Driver Authentication')" class="text-xs bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+      <button id="header-auth-btn" onclick="navigatePage('page-driver-login', 'Driver Authentication')" type="button" class="text-xs bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
         <svg class="w-3.5 h-3.5 text-gcr" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -150,8 +146,10 @@
     </div>
   </header>
 
+  <!-- BACKDROP OVERLAY -->
   <div id="drawer-backdrop" onclick="toggleDrawer(false)"></div>
 
+  <!-- SLIDE-OUT DRAWER -->
   <aside id="nav-drawer" class="ui-panel border-r border-white/[0.08] flex flex-col justify-between shadow-2xl">
     <div>
       <div class="p-4 border-b border-white/[0.08] flex items-center justify-between">
@@ -215,8 +213,8 @@
     </div>
   </aside>
 
+  <!-- ==================== PAGE 1: FLEET OVERVIEW ==================== -->
   <div id="page-map" class="page-content flex-1 flex flex-col-reverse lg:grid lg:grid-cols-3 gap-3 p-3 sm:p-4 overflow-hidden min-h-0">
-    
     <section class="h-[210px] sm:h-[250px] lg:h-full space-y-2 flex flex-col shrink-0 min-h-0">
       <div class="flex items-center justify-between px-1">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Reefer Telemetry</span>
@@ -226,7 +224,7 @@
     </section>
 
     <section class="flex-1 lg:col-span-2 ui-panel p-2 rounded-xl flex flex-col min-h-[300px] lg:min-h-0 relative overflow-hidden">
-      
+      <!-- Search Box with Autocomplete Container Removed -->
       <div class="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-[995] max-w-md mx-auto">
         <div class="ui-panel rounded-xl p-1.5 shadow-2xl flex items-center gap-2 border border-white/[0.12]">
           <svg class="w-4 h-4 text-gcr ml-1.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -235,7 +233,7 @@
           <input 
             id="map-search-input" 
             type="text" 
-            placeholder="Search address in PH (e.g. Balintawak, Pasig)..." 
+            placeholder="Search destination in PH (e.g. Balintawak, Pasig)..." 
             class="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none py-1 font-medium"
             onkeydown="if(event.key==='Enter') executeMapSearch()"
           />
@@ -246,14 +244,13 @@
             Route
           </button>
         </div>
-
-        <div id="search-results-box" class="hidden ui-panel mt-1.5 rounded-xl border border-white/[0.08] shadow-2xl max-h-40 overflow-y-auto divide-y divide-white/[0.05]"></div>
       </div>
 
       <div id="map"></div>
     </section>
   </div>
 
+  <!-- ==================== PAGE 2: LOGISTICS ADMIN GATE ==================== -->
   <div id="page-admin-gate" class="page-content hidden flex-1 max-w-sm w-full mx-auto p-4 my-auto space-y-4">
     <div class="ui-panel p-5 sm:p-6 rounded-2xl shadow-xl space-y-4 border border-white/[0.08]">
       <div class="space-y-1">
@@ -287,8 +284,8 @@
     </div>
   </div>
 
+  <!-- ==================== PAGE 3: LOGISTICS ADMIN COMMAND PORTAL ==================== -->
   <div id="page-admin-dashboard" class="page-content hidden flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 space-y-4 overflow-y-auto">
-    
     <div class="ui-panel p-4 rounded-xl flex flex-wrap items-center justify-between gap-3 border border-white/[0.08]">
       <div>
         <span class="text-[10px] font-mono text-gcr uppercase tracking-wider">Navotas Dispatch Matrix</span>
@@ -344,13 +341,13 @@
               <th class="p-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody id="admin-fleet-table" class="divide-y divide-white/[0.04]">
-            </tbody>
+          <tbody id="admin-fleet-table" class="divide-y divide-white/[0.04]"></tbody>
         </table>
       </div>
     </div>
   </div>
 
+  <!-- ==================== PAGE 4: DRIVER LOGIN ==================== -->
   <div id="page-driver-login" class="page-content hidden flex-1 max-w-sm w-full mx-auto p-4 my-auto space-y-4">
     <div class="ui-panel p-5 sm:p-6 rounded-2xl shadow-xl space-y-4 border border-white/[0.08]">
       <div class="space-y-1">
@@ -400,6 +397,7 @@
     </div>
   </div>
 
+  <!-- ==================== PAGE 5: DRIVER COCKPIT ==================== -->
   <div id="page-driver-cockpit" class="page-content hidden flex-1 max-w-lg w-full mx-auto p-3 sm:p-4 space-y-3.5 overflow-y-auto">
     <div class="ui-panel p-4 sm:p-5 rounded-xl space-y-3">
       <div class="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
@@ -439,6 +437,7 @@
     </div>
   </div>
 
+  <!-- ==================== PAGE 6: DISPATCH MANIFEST ==================== -->
   <div id="page-operator" class="page-content hidden flex-1 max-w-2xl w-full mx-auto p-3 sm:p-4 space-y-4 overflow-y-auto">
     <div class="ui-panel p-4 sm:p-6 rounded-xl space-y-4">
       <div class="border-b border-white/[0.08] pb-3 flex items-center justify-between">
@@ -513,6 +512,7 @@
     </div>
   </div>
 
+  <!-- ==================== PAGE 7: REEFER TELEMETRY ==================== -->
   <div id="page-coldchain" class="page-content hidden flex-1 max-w-4xl w-full mx-auto p-3 sm:p-4 space-y-3 overflow-y-auto">
     <div class="ui-panel p-4 sm:p-5 rounded-xl space-y-3">
       <div class="border-b border-white/[0.08] pb-2">
@@ -523,6 +523,7 @@
     </div>
   </div>
 
+  <!-- ==================== PAGE 8: HUB PROFILE ==================== -->
   <div id="page-hub" class="page-content hidden flex-1 max-w-2xl w-full mx-auto p-3 sm:p-4 space-y-3 overflow-y-auto">
     <div class="ui-panel p-5 rounded-xl space-y-4">
       <div class="flex items-center gap-3 border-b border-white/[0.08] pb-3">
@@ -543,6 +544,7 @@
     </div>
   </div>
 
+  <!-- DRAWER JS SCRIPT -->
   <script>
     function toggleDrawer(open) {
       const drawer = document.getElementById('nav-drawer');
@@ -557,6 +559,6 @@
     }
   </script>
 
-  <script src="app.js?v=10.0"></script>
+  <script src="app.js?v=11.0"></script>
 </body>
 </html>
