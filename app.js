@@ -191,32 +191,19 @@ const markers = {};
 let activeRoutingControl = null;
 let loggedInDriverTruckId = null;
 
-// Populate Unit Selectors
-function populateTruckDropdowns() {
-  const loginSelect = document.getElementById('login-truck-select');
+// Hook up manifest vehicle changes to update driver name display
+function initManifestDriverSync() {
   const manSelect = document.getElementById('man-truck-id');
   const manDriver = document.getElementById('man-driver-name');
-
-  if (loginSelect) {
-    loginSelect.innerHTML = fleetData.map(t => 
-      `<option value="${t.id}">${t.id} (${t.plate}) — ${t.driver}</option>`
-    ).join('');
-  }
-
-  if (manSelect) {
-    manSelect.innerHTML = fleetData.map(t => 
-      `<option value="${t.id}">${t.id} (${t.plate})</option>`
-    ).join('');
-
+  if (manSelect && manDriver) {
     manSelect.onchange = () => {
       const found = fleetData.find(t => t.id === manSelect.value);
-      if (found && manDriver) manDriver.value = found.driver;
+      if (found) manDriver.value = found.driver;
     };
-    if (fleetData[0] && manDriver) manDriver.value = fleetData[0].driver;
   }
 }
 
-// ==================== IN-APP ROUTING ====================
+// In-App Routing Engine
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
@@ -307,7 +294,7 @@ window.navigatePage = function(pageId, pageTitle) {
   if (typeof toggleDrawer === 'function') toggleDrawer(false);
 };
 
-// ==================== DRIVER AUTHENTICATION ====================
+// Driver Authentication
 window.handleDriverLogin = function(e) {
   e.preventDefault();
   const truckId = document.getElementById('login-truck-select').value;
@@ -458,7 +445,7 @@ function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// ==================== PAGE 1: ADMIN DASHBOARD ====================
+// Admin Dashboard Rendering
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
   if (!listContainer) return;
@@ -607,5 +594,5 @@ function renderColdChainCards() {
 }
 
 // Initial Boot
-populateTruckDropdowns();
+initManifestDriverSync();
 renderAdminDashboard();
