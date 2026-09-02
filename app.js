@@ -1,30 +1,28 @@
-// Navotas Central Hub Base Coordinates
+// Navotas Central Hub Coordinates
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Initialize Leaflet Map with responsive options
+// Initialize Map
 const map = L.map('map', { 
   zoomControl: false,
-  tap: false // prevents iOS Safari double-tap delay
+  tap: false
 }).setView(NAVOTAS_CENTER, 12);
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// Carto Voyager Clean Navigation Tiles
+// Voyager Tiles
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-// 10-Truck Fleet State
+// 10-Unit Operational Fleet Roster
 let fleetData = [
   {
     id: 'REEFER-01',
     plate: 'NDG-4421',
     driver: 'Danilo Brenio Sr.',
-    mobileLast4: '8821',
-    birthYear: '1978',
     passcode: '88211978',
-    cargo: 'Frozen Bangus & Tilapia Blocks (2.4T)',
+    cargo: 'Frozen Bangus Blocks (2.4T)',
     temp: -19.4,
     lat: 14.6560,
     lng: 120.9520,
@@ -39,17 +37,15 @@ let fleetData = [
     id: 'REEFER-02',
     plate: 'CBC-8902',
     driver: 'Reynaldo Santos',
-    mobileLast4: '4190',
-    birthYear: '1984',
     passcode: '41901984',
-    cargo: 'Imported Pork Belly & Beef Cuts (3.2T)',
+    cargo: 'Imported Pork Belly (3.2T)',
     temp: -18.2,
     lat: 14.6390,
     lng: 120.9850,
     speed: 26,
     currentStopIndex: 0,
     stops: [
-      { name: 'Divisoria Frozen Wholesale Section', lat: 14.6040, lng: 120.9720, status: 'In Transit' },
+      { name: 'Divisoria Frozen Section', lat: 14.6040, lng: 120.9720, status: 'In Transit' },
       { name: 'España Commissary Bay 2', lat: 14.6120, lng: 120.9930, status: 'Pending' }
     ]
   },
@@ -57,27 +53,23 @@ let fleetData = [
     id: 'REEFER-03',
     plate: 'TGC-1198',
     driver: 'Arnel Mendoza',
-    mobileLast4: '7732',
-    birthYear: '1991',
     passcode: '77321991',
-    cargo: 'Fresh Live Shells (Tahong & Talaba)',
+    cargo: 'Live Shells / Tahong (1.8T)',
     temp: 2.5,
     lat: 14.6545,
     lng: 120.9485,
     speed: 0,
     currentStopIndex: 0,
     stops: [
-      { name: 'Farmer\'s Market Cubao Bay 4', lat: 14.6210, lng: 121.0530, status: 'Loading at Hub' }
+      { name: 'Farmer\'s Market Cubao', lat: 14.6210, lng: 121.0530, status: 'Loading' }
     ]
   },
   {
     id: 'REEFER-04',
     plate: 'NAL-5510',
     driver: 'Eduardo De Guzman',
-    mobileLast4: '3314',
-    birthYear: '1980',
     passcode: '33141980',
-    cargo: 'Frozen Squid & Crab Meat (2.0T)',
+    cargo: 'Frozen Squid / Crab (2.0T)',
     temp: -20.1,
     lat: 14.6450,
     lng: 120.9650,
@@ -91,10 +83,8 @@ let fleetData = [
     id: 'REEFER-05',
     plate: 'WAX-2041',
     driver: 'Marlon Bautista',
-    mobileLast4: '9021',
-    birthYear: '1988',
     passcode: '90211988',
-    cargo: 'Imported Beef Flank & Ribs (2.8T)',
+    cargo: 'Imported Beef Ribs (2.8T)',
     temp: -17.8,
     lat: 14.6120,
     lng: 121.0020,
@@ -108,10 +98,8 @@ let fleetData = [
     id: 'REEFER-06',
     plate: 'NDO-7729',
     driver: 'Roberto Villanueva',
-    mobileLast4: '6645',
-    birthYear: '1975',
     passcode: '66451975',
-    cargo: 'Frozen Milkfish & Galunggong (3.5T)',
+    cargo: 'Frozen Galunggong (3.5T)',
     temp: -19.0,
     lat: 14.6620,
     lng: 120.9380,
@@ -125,68 +113,60 @@ let fleetData = [
     id: 'REEFER-07',
     plate: 'CBA-3301',
     driver: 'Junar Delos Reyes',
-    mobileLast4: '1198',
-    birthYear: '1995',
     passcode: '11981995',
-    cargo: 'Chilled Oysters & Clams (1.5T)',
+    cargo: 'Chilled Oysters (1.5T)',
     temp: 3.1,
     lat: 14.5800,
     lng: 120.9900,
     speed: 30,
     currentStopIndex: 0,
     stops: [
-      { name: 'Manila Bay Seafood Terminal', lat: 14.5650, lng: 120.9850, status: 'In Transit' }
+      { name: 'Manila Bay Terminal', lat: 14.5650, lng: 120.9850, status: 'In Transit' }
     ]
   },
   {
     id: 'REEFER-08',
     plate: 'NDF-6184',
     driver: 'Joel Manansala',
-    mobileLast4: '5540',
-    birthYear: '1982',
     passcode: '55401982',
-    cargo: 'Frozen Pork Ham & Belly (2.1T)',
+    cargo: 'Frozen Pork Ham (2.1T)',
     temp: -18.6,
     lat: 14.6300,
     lng: 121.0300,
     speed: 38,
     currentStopIndex: 0,
     stops: [
-      { name: 'San Juan Cold Storage Hub', lat: 14.6010, lng: 121.0350, status: 'In Transit' }
+      { name: 'San Juan Storage Hub', lat: 14.6010, lng: 121.0350, status: 'In Transit' }
     ]
   },
   {
     id: 'REEFER-09',
     plate: 'WBH-4890',
     driver: 'Christopher Ocampo',
-    mobileLast4: '2276',
-    birthYear: '1989',
     passcode: '22761989',
-    cargo: 'Frozen Shrimp & Prawns (1.9T)',
+    cargo: 'Frozen Tiger Prawns (1.9T)',
     temp: -21.0,
     lat: 14.6700,
     lng: 121.0100,
     speed: 0,
     currentStopIndex: 0,
     stops: [
-      { name: 'Novaliches Wet & Dry Center', lat: 14.7200, lng: 121.0400, status: 'Loading at Hub' }
+      { name: 'Novaliches Center', lat: 14.7200, lng: 121.0400, status: 'Loading' }
     ]
   },
   {
     id: 'REEFER-10',
     plate: 'TGH-7734',
     driver: 'Ferdinand Soriano',
-    mobileLast4: '4903',
-    birthYear: '1979',
     passcode: '49031979',
-    cargo: 'Frozen Beef Brisket Blocks (3.0T)',
+    cargo: 'Frozen Beef Brisket (3.0T)',
     temp: -19.5,
     lat: 14.6545,
     lng: 120.9485,
     speed: 0,
     currentStopIndex: 0,
     stops: [
-      { name: 'Marikina Riverbanks Market Bay', lat: 14.6300, lng: 121.0900, status: 'Loading at Hub' }
+      { name: 'Marikina Riverbanks Bay', lat: 14.6300, lng: 121.0900, status: 'Loading' }
     ]
   }
 ];
@@ -195,7 +175,7 @@ const markers = {};
 let activeRoutingControl = null;
 let loggedInDriverTruckId = null;
 
-// Synchronize manifest select with driver name
+// Synchronize Manifest Vehicle Selection with Driver Name
 function initManifestDriverSync() {
   const manSelect = document.getElementById('man-truck-id');
   const manDriver = document.getElementById('man-driver-name');
@@ -207,37 +187,34 @@ function initManifestDriverSync() {
   }
 }
 
-// In-App Turn-by-Turn Routing Engine
+// In-App Turn Routing
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
   }
 
   activeRoutingControl = L.Routing.control({
-    waypoints: [
-      L.latLng(fromLat, fromLng),
-      L.latLng(toLat, toLng)
-    ],
+    waypoints: [L.latLng(fromLat, fromLng), L.latLng(toLat, toLng)],
     routeWhileDragging: false,
     addWaypoints: false,
     showAlternatives: false,
     collapsible: true,
     lineOptions: {
       styles: [
-        { color: '#0369a1', opacity: 0.8, weight: 6 },
-        { color: '#38bdf8', opacity: 1, weight: 4 }
+        { color: '#0369a1', opacity: 0.8, weight: 5 },
+        { color: '#38bdf8', opacity: 1, weight: 3 }
       ]
     },
     createMarker: function(i, wp) {
       const isStart = i === 0;
       return L.marker(wp.latLng).bindPopup(
-        `<div style="font-family:inherit;font-size:11px;"><b>${isStart ? 'Origin' : 'Destination'}:</b> ${isStart ? 'Truck Position' : destinationName}</div>`
+        `<div style="font-size:11px;font-family:inherit;"><b>${isStart ? 'Vehicle Location' : 'Destination'}:</b> ${isStart ? 'GPS Pos' : destinationName}</div>`
       );
     }
   }).addTo(map);
 }
 
-// Map Address Search Engine
+// OpenStreetMap Geocoding Search
 async function executeMapSearch() {
   const input = document.getElementById('map-search-input');
   const query = input.value.trim();
@@ -245,22 +222,22 @@ async function executeMapSearch() {
   if (!query) return;
 
   resultsBox.classList.remove('hidden');
-  resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">Searching road locations in the Philippines...</div>`;
+  resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">Searching road network...</div>`;
 
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=5`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=4`);
     const data = await res.json();
 
     resultsBox.innerHTML = '';
     if (data.length === 0) {
-      resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">No destinations found. Try adding a city name.</div>`;
+      resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">No destination points found.</div>`;
       return;
     }
 
     data.forEach(item => {
       const div = document.createElement('div');
-      div.className = "p-2.5 hover:bg-gcr/20 text-xs text-slate-200 cursor-pointer transition flex items-start gap-2";
-      div.innerHTML = `<span class="text-gcr">📍</span> <span class="truncate">${item.display_name}</span>`;
+      div.className = "p-2 hover:bg-white/[0.05] text-xs text-slate-300 cursor-pointer transition truncate";
+      div.innerText = item.display_name;
       div.onclick = () => {
         const destLat = parseFloat(item.lat);
         const destLng = parseFloat(item.lon);
@@ -273,11 +250,11 @@ async function executeMapSearch() {
       resultsBox.appendChild(div);
     });
   } catch (err) {
-    resultsBox.innerHTML = `<div class="p-2.5 text-xs text-rose-400">Search error. Please try again.</div>`;
+    resultsBox.innerHTML = `<div class="p-2.5 text-xs text-rose-400">Lookup service error.</div>`;
   }
 }
 
-// Global Page Navigation
+// Page Router
 window.navigatePage = function(pageId, pageTitle) {
   document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
 
@@ -298,7 +275,7 @@ window.navigatePage = function(pageId, pageTitle) {
   if (typeof toggleDrawer === 'function') toggleDrawer(false);
 };
 
-// Driver Authentication
+// Driver Login
 window.handleDriverLogin = function(e) {
   e.preventDefault();
   const truckId = document.getElementById('login-truck-select').value;
@@ -311,29 +288,28 @@ window.handleDriverLogin = function(e) {
     errorBox.classList.add('hidden');
     loggedInDriverTruckId = truck.id;
 
-    // Update Header
-    document.getElementById('header-auth-label').innerText = truck.driver.split(' ')[0] + ' (Live)';
-    document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-cockpit', 'Driver Cockpit Terminal');
+    document.getElementById('header-auth-label').innerText = truck.driver.split(' ')[0];
+    document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-cockpit', 'Driver Cockpit');
 
-    navigatePage('page-driver-cockpit', `${truck.id} — Driver Terminal`);
+    navigatePage('page-driver-cockpit', `${truck.id} Cockpit`);
     renderDriverCockpit();
   } else {
     errorBox.classList.remove('hidden');
-    errorBox.innerText = 'Authentication Failed: Passcode does not match vehicle driver records.';
+    errorBox.innerText = 'Passcode mismatch for selected unit.';
   }
 };
 
 window.handleDriverLogout = function() {
   loggedInDriverTruckId = null;
-  document.getElementById('header-auth-label').innerText = 'Login';
-  document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-login', 'Driver Authentication Portal');
+  document.getElementById('header-auth-label').innerText = 'Driver Portal';
+  document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-login', 'Driver Authentication');
   document.getElementById('login-passcode').value = '';
-  navigatePage('page-driver-login', 'Driver Authentication Portal');
+  navigatePage('page-driver-login', 'Driver Authentication');
 };
 
 function renderDriverCockpit() {
   if (!loggedInDriverTruckId) {
-    navigatePage('page-driver-login', 'Driver Authentication Portal');
+    navigatePage('page-driver-login', 'Driver Authentication');
     return;
   }
 
@@ -341,7 +317,7 @@ function renderDriverCockpit() {
   if (!truck) return;
 
   document.getElementById('cockpit-driver-name').innerText = truck.driver;
-  document.getElementById('cockpit-truck-tag').innerText = `Assigned Unit: ${truck.id} (${truck.plate}) | Cargo: ${truck.cargo}`;
+  document.getElementById('cockpit-truck-tag').innerText = `${truck.id} (${truck.plate}) — ${truck.cargo}`;
 
   const container = document.getElementById('driver-stops-list');
   container.innerHTML = '';
@@ -351,21 +327,21 @@ function renderDriverCockpit() {
     const isDone = stop.status === 'Completed';
 
     const card = document.createElement('div');
-    card.className = `p-3.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/15' : 'border-gcr-border/40 bg-black/25'} flex items-center justify-between gap-2.5`;
+    card.className = `p-3 rounded-lg border ${isCurrent ? 'border-gcr/50 bg-gcr/10' : 'border-white/[0.06] bg-black/25'} flex items-center justify-between gap-2`;
     card.innerHTML = `
       <div class="min-w-0 flex-1">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'} truncate">Drop ${index + 1}: ${stop.name}</span>
-          ${isCurrent ? '<span class="text-[8px] sm:text-[9px] bg-gcr text-white font-bold px-1.5 py-0.5 rounded-full shrink-0">ACTIVE</span>' : ''}
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-semibold ${isDone ? 'text-slate-500 line-through' : 'text-white'} truncate">${index + 1}. ${stop.name}</span>
+          ${isCurrent ? '<span class="text-[9px] font-mono bg-gcr text-white px-1.5 py-0.2 rounded shrink-0">NEXT</span>' : ''}
         </div>
-        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
+        <p class="text-[10px] text-slate-400 font-mono mt-0.5">${stop.status}</p>
       </div>
       <div class="shrink-0">
         ${isCurrent ? `
-          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer active:scale-95">
+          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-medium transition cursor-pointer">
             Delivered
           </button>
-        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Done</span>' : '<span class="text-xs text-slate-500">Pending</span>'}
+        ` : isDone ? '<span class="text-xs text-emerald-400 font-mono">COMPLETE</span>' : '<span class="text-xs text-slate-500 font-mono">QUEUED</span>'}
       </div>
     `;
     container.appendChild(card);
@@ -385,7 +361,7 @@ window.markStopCompleted = function(truckId, stopIndex) {
   renderAdminDashboard();
 };
 
-// Driver GPS Broadcasting Engine
+// Geolocation Broadcaster
 let watchId = null;
 const btnGps = document.getElementById('btn-toggle-gps');
 const gpsBadge = document.getElementById('gps-status-badge');
@@ -398,17 +374,21 @@ if (btnGps) {
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
-      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-98";
-      gpsBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
-      gpsBadge.innerText = 'GPS Offline';
+      btnGps.innerHTML = `
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 19.5v-.75a7.5 7.5 0 00-7.5-7.5H4.5m0-6.75h.75c7.87 0 14.25 6.38 14.25 14.25v.75M6 18.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        <span>Broadcast GPS</span>`;
+      btnGps.className = "w-full py-2.5 rounded-lg font-semibold text-xs bg-gcr hover:bg-gcr-dark text-white transition flex items-center justify-center gap-2 cursor-pointer";
+      gpsBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-white/[0.05] text-slate-400 border border-white/[0.08]";
+      gpsBadge.innerText = 'STANDBY';
       telemetry.classList.add('hidden');
     } else {
-      if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
-      gpsBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
-      gpsBadge.innerText = 'GPS Live Broadcasting';
-      btnGps.innerHTML = '<span>⏹️</span> Stop Broadcasting Location';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-98";
+      if (!navigator.geolocation) return alert('Geolocation is not supported.');
+      gpsBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      gpsBadge.innerText = 'LIVE BROADCAST';
+      btnGps.innerText = 'Stop GPS Stream';
+      btnGps.className = "w-full py-2.5 rounded-lg font-semibold text-xs bg-rose-600 hover:bg-rose-700 text-white transition flex items-center justify-center gap-2 cursor-pointer";
       telemetry.classList.remove('hidden');
 
       watchId = navigator.geolocation.watchPosition((pos) => {
@@ -435,7 +415,6 @@ if (btnGps) {
   });
 }
 
-// Distance Calculation Helper
 function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -449,7 +428,7 @@ function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// Render Admin Dashboard
+// Sidebar Vehicle List
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
   if (!listContainer) return;
@@ -467,11 +446,11 @@ function renderAdminDashboard() {
     }
 
     markers[truck.id].bindPopup(`
-      <div style="min-width: 170px;">
-        <div style="font-weight:bold; color:#4AADE3;">${truck.id} (${truck.plate})</div>
-        <div style="font-size:11px; margin-top:2px; color:#e2e8f0;"><b>Driver:</b> ${truck.driver}</div>
-        <div style="font-size:11px; color:#e2e8f0;"><b>Next Drop:</b> ${activeStop.name}</div>
-        <div style="font-size:11px; color:#38bdf8;"><b>Approx:</b> ~${eta.etaMinutes} mins (${eta.distanceKm} km)</div>
+      <div style="font-size:11px;font-family:inherit;min-width:160px;">
+        <div style="font-weight:700;color:#4AADE3;">${truck.id} • ${truck.plate}</div>
+        <div style="color:#94a3b8;margin-top:2px;">Driver: ${truck.driver}</div>
+        <div style="color:#cbd5e1;">Next: ${activeStop.name}</div>
+        <div style="color:#38bdf8;font-family:monospace;margin-top:2px;">ETA: ~${eta.etaMinutes}m (${eta.distanceKm}km)</div>
       </div>
     `);
 
@@ -480,24 +459,23 @@ function renderAdminDashboard() {
     }
 
     const card = document.createElement('div');
-    card.className = "p-3 sm:p-4 rounded-xl sm:rounded-2xl glass-panel hover:border-gcr/60 transition duration-200 cursor-pointer shadow-md group";
+    card.className = "p-2.5 rounded-lg ui-panel hover:border-white/[0.18] transition cursor-pointer shadow-sm";
     card.innerHTML = `
-      <div class="flex items-center justify-between mb-1 sm:mb-2">
-        <span class="font-display font-bold text-xs sm:text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
-        <span class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-semibold bg-sky-500/15 text-gcr border border-gcr/30">
-          ${completedCount}/${truck.stops.length} Drops
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-display font-bold text-xs text-white">${truck.id}</span>
+        <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-gcr border border-white/[0.08]">
+          ${completedCount}/${truck.stops.length} DROPS
         </span>
       </div>
-      <div class="text-[11px] sm:text-xs text-slate-300 space-y-1">
-        <p class="text-slate-400 truncate text-[10px] sm:text-[11px]">📦 ${truck.cargo}</p>
-        <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white font-medium truncate max-w-[130px]">${truck.driver}</span></p>
-        <p class="flex justify-between"><span class="text-slate-400">Box Temp:</span> <span class="text-sky-300 font-bold font-mono">${truck.temp}°C</span></p>
-        <div class="mt-1.5 pt-1.5 border-t border-gcr-border/30">
-          <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop:</p>
-          <p class="text-white font-medium truncate">${activeStop.name}</p>
-          <p class="text-emerald-400 font-semibold mt-0.5 text-[10px] sm:text-[11px]">
-            ETA: ~${eta.etaMinutes} mins (${eta.distanceKm} km)
-          </p>
+      <div class="text-[11px] text-slate-300 space-y-0.5">
+        <div class="flex justify-between font-mono text-[10px]">
+          <span class="text-slate-400">${truck.plate}</span>
+          <span class="text-sky-300 font-bold">${truck.temp}°C</span>
+        </div>
+        <p class="text-slate-400 text-[10px] truncate">${truck.driver} • ${truck.cargo}</p>
+        <div class="pt-1 mt-1 border-t border-white/[0.05] flex justify-between items-center text-[10px]">
+          <span class="text-slate-400 truncate max-w-[130px]">${activeStop.name}</span>
+          <span class="text-emerald-400 font-mono">~${eta.etaMinutes}m</span>
         </div>
       </div>
     `;
@@ -512,29 +490,29 @@ function renderAdminDashboard() {
   });
 }
 
-// Manifest Drop-Off Rows
-let stopRowCount = 2;
-
-window.addStopInputRow = function() {
-  stopRowCount++;
+// Manifest Stop Append
+function addStopInputRow() {
   const container = document.getElementById('stops-input-container');
+  const count = container.querySelectorAll('.stop-row').length + 1;
   const row = document.createElement('div');
   row.className = "flex items-center gap-2 stop-row";
   row.innerHTML = `
-    <span class="text-[11px] sm:text-xs text-gcr font-bold w-14 shrink-0">Stop ${stopRowCount}:</span>
-    <input type="text" required placeholder="Enter drop location..." class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
-    <button type="button" onclick="removeStopRow(this)" class="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
+    <span class="text-[11px] font-mono text-slate-400 w-12 shrink-0">Stop ${count}</span>
+    <input type="text" required placeholder="Destination address..." class="stop-name-input flex-1 bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none">
+    <button type="button" onclick="removeStopRow(this)" class="p-1 text-slate-400 hover:text-rose-400 cursor-pointer">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+    </button>
   `;
   container.appendChild(row);
-};
+}
 
-window.removeStopRow = function(btn) {
+function removeStopRow(btn) {
   const rows = document.querySelectorAll('.stop-row');
-  if (rows.length <= 1) return alert('At least 1 destination stop is required.');
+  if (rows.length <= 1) return alert('A minimum of 1 stop is required.');
   btn.closest('.stop-row').remove();
-};
+}
 
-window.handleManifestSubmit = function(e) {
+function handleManifestSubmit(e) {
   e.preventDefault();
 
   const truckId = document.getElementById('man-truck-id').value;
@@ -556,7 +534,7 @@ window.handleManifestSubmit = function(e) {
     }
   });
 
-  if (stopsList.length === 0) return alert('Please specify a delivery destination.');
+  if (stopsList.length === 0) return alert('Please enter at least one stop.');
 
   const truck = fleetData.find(t => t.id === truckId);
   if (truck) {
@@ -568,11 +546,11 @@ window.handleManifestSubmit = function(e) {
   }
 
   renderAdminDashboard();
-  alert(`✅ Manifest Logged for ${truckId}!\nAssigned ${stopsList.length} drop-off stops.`);
-  navigatePage('page-map', 'Live Fleet & Road Search Map');
-};
+  alert(`Manifest logged for ${truckId}.`);
+  navigatePage('page-map', 'Fleet Monitoring & Map');
+}
 
-// Cold Chain Compliance Cards
+// Cold Chain Cards
 function renderColdChainCards() {
   const container = document.getElementById('coldchain-cards');
   if (!container) return;
@@ -580,27 +558,25 @@ function renderColdChainCards() {
 
   fleetData.forEach(truck => {
     const card = document.createElement('div');
-    card.className = "glass-panel p-3.5 sm:p-4 rounded-xl space-y-1.5 sm:space-y-2 border border-gcr-border/40 shadow-lg";
+    card.className = "ui-panel p-3 rounded-lg space-y-1.5";
     card.innerHTML = `
       <div class="flex justify-between items-center">
-        <span class="font-display font-bold text-xs sm:text-sm text-white">${truck.id} (${truck.plate})</span>
+        <span class="font-display font-bold text-xs text-white">${truck.id}</span>
         <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
       </div>
-      <p class="text-xs text-slate-300">Driver: <span class="text-white">${truck.driver}</span></p>
-      <p class="text-[11px] sm:text-xs text-slate-400 truncate">📦 ${truck.cargo}</p>
-      <div class="text-[10px] sm:text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
-        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Compressor Normal
+      <p class="text-[11px] text-slate-400 truncate">${truck.driver} • ${truck.cargo}</p>
+      <div class="text-[10px] font-mono text-emerald-400 flex items-center gap-1.5 pt-0.5">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> NORMAL
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// Window resize handler to ensure map tiles adapt dynamically between portrait and landscape
 window.addEventListener('resize', () => {
   if (map) map.invalidateSize();
 });
 
-// Initial Boot
+// Initial boot
 initManifestDriverSync();
 renderAdminDashboard();
