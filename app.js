@@ -1,22 +1,25 @@
-// Navotas Central Hub baseline
+// Navotas Central Hub Base Coordinates
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
 // Initialize Leaflet Map
 const map = L.map('map', { zoomControl: false }).setView(NAVOTAS_CENTER, 12);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// Carto Voyager Clean Navigation Tiles
+// Carto Voyager Map Tiles
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-// Global Fleet State
+// 10-Truck Operational Fleet with 8-digit Login Passcodes (Last 4 digits of phone + 4-digit birth year)
 let fleetData = [
   {
     id: 'REEFER-01',
     plate: 'NDG-4421',
-    driver: 'Danilo B.',
+    driver: 'Danilo Brenio Sr.',
+    mobileLast4: '8821',
+    birthYear: '1978',
+    passcode: '88211978',
     cargo: 'Frozen Bangus & Tilapia Blocks (2.4T)',
     temp: -19.4,
     lat: 14.6560,
@@ -31,7 +34,10 @@ let fleetData = [
   {
     id: 'REEFER-02',
     plate: 'CBC-8902',
-    driver: 'Reynaldo S.',
+    driver: 'Reynaldo Santos',
+    mobileLast4: '4190',
+    birthYear: '1984',
+    passcode: '41901984',
     cargo: 'Imported Pork Belly & Beef Cuts (3.2T)',
     temp: -18.2,
     lat: 14.6390,
@@ -46,7 +52,10 @@ let fleetData = [
   {
     id: 'REEFER-03',
     plate: 'TGC-1198',
-    driver: 'Arnel M.',
+    driver: 'Arnel Mendoza',
+    mobileLast4: '7732',
+    birthYear: '1991',
+    passcode: '77321991',
     cargo: 'Fresh Live Shells (Tahong & Talaba)',
     temp: 2.5,
     lat: 14.6545,
@@ -56,13 +65,158 @@ let fleetData = [
     stops: [
       { name: 'Farmer\'s Market Cubao Bay 4', lat: 14.6210, lng: 121.0530, status: 'Loading at Hub' }
     ]
+  },
+  {
+    id: 'REEFER-04',
+    plate: 'NAL-5510',
+    driver: 'Eduardo De Guzman',
+    mobileLast4: '3314',
+    birthYear: '1980',
+    passcode: '33141980',
+    cargo: 'Frozen Squid & Crab Meat (2.0T)',
+    temp: -20.1,
+    lat: 14.6450,
+    lng: 120.9650,
+    speed: 40,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Pasig Mega Market Bay 1', lat: 14.5580, lng: 121.0840, status: 'In Transit' }
+    ]
+  },
+  {
+    id: 'REEFER-05',
+    plate: 'WAX-2041',
+    driver: 'Marlon Bautista',
+    mobileLast4: '9021',
+    birthYear: '1988',
+    passcode: '90211988',
+    cargo: 'Imported Beef Flank & Ribs (2.8T)',
+    temp: -17.8,
+    lat: 14.6120,
+    lng: 121.0020,
+    speed: 22,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Commonwealth Cold Depot', lat: 14.6900, lng: 121.0800, status: 'In Transit' }
+    ]
+  },
+  {
+    id: 'REEFER-06',
+    plate: 'NDO-7729',
+    driver: 'Roberto Villanueva',
+    mobileLast4: '6645',
+    birthYear: '1975',
+    passcode: '66451975',
+    cargo: 'Frozen Milkfish & Galunggong (3.5T)',
+    temp: -19.0,
+    lat: 14.6620,
+    lng: 120.9380,
+    speed: 15,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Malabon Central Market', lat: 14.6610, lng: 120.9550, status: 'In Transit' }
+    ]
+  },
+  {
+    id: 'REEFER-07',
+    plate: 'CBA-3301',
+    driver: 'Junar Delos Reyes',
+    mobileLast4: '1198',
+    birthYear: '1995',
+    passcode: '11981995',
+    cargo: 'Chilled Oysters & Clams (1.5T)',
+    temp: 3.1,
+    lat: 14.5800,
+    lng: 120.9900,
+    speed: 30,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Manila Bay Seafood Terminal', lat: 14.5650, lng: 120.9850, status: 'In Transit' }
+    ]
+  },
+  {
+    id: 'REEFER-08',
+    plate: 'NDF-6184',
+    driver: 'Joel Manansala',
+    mobileLast4: '5540',
+    birthYear: '1982',
+    passcode: '55401982',
+    cargo: 'Frozen Pork Ham & Belly (2.1T)',
+    temp: -18.6,
+    lat: 14.6300,
+    lng: 121.0300,
+    speed: 38,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'San Juan Cold Storage Hub', lat: 14.6010, lng: 121.0350, status: 'In Transit' }
+    ]
+  },
+  {
+    id: 'REEFER-09',
+    plate: 'WBH-4890',
+    driver: 'Christopher Ocampo',
+    mobileLast4: '2276',
+    birthYear: '1989',
+    passcode: '22761989',
+    cargo: 'Frozen Shrimp & Prawns (1.9T)',
+    temp: -21.0,
+    lat: 14.6700,
+    lng: 121.0100,
+    speed: 0,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Novaliches Wet & Dry Center', lat: 14.7200, lng: 121.0400, status: 'Loading at Hub' }
+    ]
+  },
+  {
+    id: 'REEFER-10',
+    plate: 'TGH-7734',
+    driver: 'Ferdinand Soriano',
+    mobileLast4: '4903',
+    birthYear: '1979',
+    passcode: '49031979',
+    cargo: 'Frozen Beef Brisket Blocks (3.0T)',
+    temp: -19.5,
+    lat: 14.6545,
+    lng: 120.9485,
+    speed: 0,
+    currentStopIndex: 0,
+    stops: [
+      { name: 'Marikina Riverbanks Market Bay', lat: 14.6300, lng: 121.0900, status: 'Loading at Hub' }
+    ]
   }
 ];
 
 const markers = {};
 let activeRoutingControl = null;
+let loggedInDriverTruckId = null;
 
-// ==================== IN-APP ROUTING ENGINE ====================
+// Populate Unit Selectors
+function populateTruckDropdowns() {
+  const loginSelect = document.getElementById('login-truck-select');
+  const manSelect = document.getElementById('man-truck-id');
+  const manDriver = document.getElementById('man-driver-name');
+
+  if (loginSelect) {
+    loginSelect.innerHTML = fleetData.map(t => 
+      `<option value="${t.id}">${t.id} (${t.plate}) — ${t.driver}</option>`
+    ).join('');
+  }
+
+  if (manSelect) {
+    manSelect.innerHTML = fleetData.map(t => 
+      `<option value="${t.id}">${t.id} (${t.plate})</option>`
+    ).join('');
+
+    manSelect.onchange = () => {
+      const found = fleetData.find(t => t.id === manSelect.value);
+      if (found && manDriver) manDriver.value = found.driver;
+    };
+    if (fleetData[0] && manDriver) manDriver.value = fleetData[0].driver;
+  }
+}
+
+// ==================== IN-APP ROUTING ====================
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
@@ -86,13 +240,13 @@ function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
     createMarker: function(i, wp) {
       const isStart = i === 0;
       return L.marker(wp.latLng).bindPopup(
-        `<div style="font-family:inherit;font-size:12px;"><b>${isStart ? 'Starting Point' : 'Destination'}:</b> ${isStart ? 'Navotas/Truck Position' : destinationName}</div>`
+        `<div style="font-family:inherit;font-size:12px;"><b>${isStart ? 'Current Location' : 'Destination'}:</b> ${isStart ? 'Truck Position' : destinationName}</div>`
       );
     }
   }).addTo(map);
 }
 
-// ==================== GOOGLE-STYLE MAP SEARCH ENGINE ====================
+// Map Address Search Engine
 async function executeMapSearch() {
   const input = document.getElementById('map-search-input');
   const query = input.value.trim();
@@ -100,7 +254,7 @@ async function executeMapSearch() {
   if (!query) return;
 
   resultsBox.classList.remove('hidden');
-  resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">Searching road addresses in the Philippines...</div>`;
+  resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">Searching road locations in the Philippines...</div>`;
 
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=5`);
@@ -108,7 +262,7 @@ async function executeMapSearch() {
 
     resultsBox.innerHTML = '';
     if (data.length === 0) {
-      resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">No locations found. Try including city name (e.g., 'Balintawak, Quezon City').</div>`;
+      resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">No destinations found. Try adding city name (e.g. 'Balintawak, Quezon City').</div>`;
       return;
     }
 
@@ -122,7 +276,6 @@ async function executeMapSearch() {
         resultsBox.classList.add('hidden');
         input.value = item.display_name.split(',')[0];
 
-        // Draw in-app road route from Navotas Central Hub to selected search destination
         drawInAppRoute(NAVOTAS_CENTER[0], NAVOTAS_CENTER[1], destLat, destLng, item.display_name.split(',')[0]);
         map.flyTo([destLat, destLng], 14, { animate: true });
       };
@@ -133,7 +286,7 @@ async function executeMapSearch() {
   }
 }
 
-// ==================== PAGE ROUTER ====================
+// Global Page Navigation
 window.navigatePage = function(pageId, pageTitle) {
   document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
 
@@ -145,15 +298,153 @@ window.navigatePage = function(pageId, pageTitle) {
   if (pageId === 'page-map') {
     setTimeout(() => map.invalidateSize(), 200);
     renderAdminDashboard();
-  } else if (pageId === 'page-driver') {
-    renderDriverStops();
   } else if (pageId === 'page-coldchain') {
     renderColdChainCards();
+  } else if (pageId === 'page-driver-cockpit') {
+    renderDriverCockpit();
   }
 
   if (typeof toggleDrawer === 'function') toggleDrawer(false);
 };
 
+// ==================== DRIVER AUTHENTICATION ====================
+window.handleDriverLogin = function(e) {
+  e.preventDefault();
+  const truckId = document.getElementById('login-truck-select').value;
+  const passcode = document.getElementById('login-passcode').value.trim();
+  const errorBox = document.getElementById('login-error-msg');
+
+  const truck = fleetData.find(t => t.id === truckId);
+
+  if (truck && truck.passcode === passcode) {
+    errorBox.classList.add('hidden');
+    loggedInDriverTruckId = truck.id;
+
+    // Update Header
+    document.getElementById('header-auth-label').innerText = truck.driver.split(' ')[0] + ' (Live)';
+    document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-cockpit', 'Driver Cockpit Terminal');
+
+    navigatePage('page-driver-cockpit', `${truck.id} — Driver Terminal`);
+    renderDriverCockpit();
+  } else {
+    errorBox.classList.remove('hidden');
+    errorBox.innerText = 'Authentication Failed: Passcode does not match vehicle driver records.';
+  }
+};
+
+window.handleDriverLogout = function() {
+  loggedInDriverTruckId = null;
+  document.getElementById('header-auth-label').innerText = 'Driver Login';
+  document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-login', 'Driver Authentication Portal');
+  document.getElementById('login-passcode').value = '';
+  navigatePage('page-driver-login', 'Driver Authentication Portal');
+};
+
+function renderDriverCockpit() {
+  if (!loggedInDriverTruckId) {
+    navigatePage('page-driver-login', 'Driver Authentication Portal');
+    return;
+  }
+
+  const truck = fleetData.find(t => t.id === loggedInDriverTruckId);
+  if (!truck) return;
+
+  document.getElementById('cockpit-driver-name').innerText = truck.driver;
+  document.getElementById('cockpit-truck-tag').innerText = `Assigned Unit: ${truck.id} (${truck.plate}) | Cargo: ${truck.cargo}`;
+
+  const container = document.getElementById('driver-stops-list');
+  container.innerHTML = '';
+
+  truck.stops.forEach((stop, index) => {
+    const isCurrent = index === truck.currentStopIndex;
+    const isDone = stop.status === 'Completed';
+
+    const card = document.createElement('div');
+    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/15' : 'border-gcr-border/40 bg-black/20'} flex items-center justify-between gap-3`;
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'}">Drop ${index + 1}: ${stop.name}</span>
+          ${isCurrent ? '<span class="text-[9px] bg-gcr text-white font-bold px-2 py-0.5 rounded-full">ACTIVE DROP</span>' : ''}
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
+      </div>
+      <div>
+        ${isCurrent ? `
+          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer">
+            Mark Delivered
+          </button>
+        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Delivered</span>' : '<span class="text-xs text-slate-500">Upcoming</span>'}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+window.markStopCompleted = function(truckId, stopIndex) {
+  const truck = fleetData.find(t => t.id === truckId);
+  truck.stops[stopIndex].status = 'Completed';
+  if (truck.currentStopIndex < truck.stops.length - 1) {
+    truck.currentStopIndex += 1;
+    truck.stops[truck.currentStopIndex].status = 'In Transit';
+    const nextStop = truck.stops[truck.currentStopIndex];
+    drawInAppRoute(truck.lat, truck.lng, nextStop.lat, nextStop.lng, nextStop.name);
+  }
+  renderDriverCockpit();
+  renderAdminDashboard();
+};
+
+// Driver GPS Broadcasting Engine
+let watchId = null;
+const btnGps = document.getElementById('btn-toggle-gps');
+const gpsBadge = document.getElementById('gps-status-badge');
+const telemetry = document.getElementById('driver-telemetry');
+const coordsTxt = document.getElementById('telemetry-coords');
+const speedTxt = document.getElementById('telemetry-speed');
+
+if (btnGps) {
+  btnGps.addEventListener('click', () => {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS Coordinates';
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+      gpsBadge.innerText = 'GPS Offline';
+      telemetry.classList.add('hidden');
+    } else {
+      if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
+      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+      gpsBadge.innerText = 'GPS Live Broadcasting';
+      btnGps.innerHTML = '<span>⏹️</span> Stop Broadcasting Location';
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      telemetry.classList.remove('hidden');
+
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+
+        coordsTxt.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        speedTxt.innerText = `${spd} km/h`;
+
+        const truck = fleetData.find(t => t.id === loggedInDriverTruckId);
+        if (truck) {
+          truck.lat = lat;
+          truck.lng = lng;
+          truck.speed = spd;
+          const activeStop = truck.stops[truck.currentStopIndex];
+          if (activeStop) {
+            drawInAppRoute(truck.lat, truck.lng, activeStop.lat, activeStop.lng, activeStop.name);
+          }
+          renderAdminDashboard();
+        }
+      }, (err) => console.error(err), { enableHighAccuracy: true });
+    }
+  });
+}
+
+// Distance & ETA Helper
 function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -167,7 +458,7 @@ function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// ==================== PAGE 1: ADMIN DASHBOARD RENDER ====================
+// ==================== PAGE 1: ADMIN DASHBOARD ====================
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
   if (!listContainer) return;
@@ -231,7 +522,7 @@ function renderAdminDashboard() {
   });
 }
 
-// ==================== PAGE 2: OPERATOR DYNAMIC MANIFEST ====================
+// Manifest Controls
 let stopRowCount = 2;
 
 window.addStopInputRow = function() {
@@ -249,10 +540,7 @@ window.addStopInputRow = function() {
 
 window.removeStopRow = function(btn) {
   const rows = document.querySelectorAll('.stop-row');
-  if (rows.length <= 1) {
-    alert('At least 1 destination stop is required.');
-    return;
-  }
+  if (rows.length <= 1) return alert('At least 1 destination stop is required.');
   btn.closest('.stop-row').remove();
 };
 
@@ -260,7 +548,6 @@ window.handleManifestSubmit = function(e) {
   e.preventDefault();
 
   const truckId = document.getElementById('man-truck-id').value;
-  const driverName = document.getElementById('man-driver-name').value.trim();
   const cargoDesc = document.getElementById('man-cargo').value.trim();
   const tempSet = parseFloat(document.getElementById('man-temp').value);
 
@@ -272,8 +559,8 @@ window.handleManifestSubmit = function(e) {
     if (name) {
       stopsList.push({
         name: name,
-        lat: NAVOTAS_CENTER[0] + (Math.random() - 0.5) * 0.06,
-        lng: NAVOTAS_CENTER[1] + (Math.random() - 0.5) * 0.08,
+        lat: NAVOTAS_CENTER[0] + (Math.random() - 0.5) * 0.08,
+        lng: NAVOTAS_CENTER[1] + (Math.random() - 0.5) * 0.09,
         status: index === 0 ? 'In Transit' : 'Pending'
       });
     }
@@ -283,7 +570,6 @@ window.handleManifestSubmit = function(e) {
 
   const truck = fleetData.find(t => t.id === truckId);
   if (truck) {
-    truck.driver = driverName;
     truck.cargo = cargoDesc;
     truck.temp = tempSet;
     truck.stops = stopsList;
@@ -296,110 +582,7 @@ window.handleManifestSubmit = function(e) {
   navigatePage('page-map', 'Live Fleet & Road Search Map');
 };
 
-// ==================== PAGE 3: DRIVER TELEMETRY ====================
-const driverSelect = document.getElementById('driver-truck-select');
-const driverStopsContainer = document.getElementById('driver-stops-list');
-
-function renderDriverStops() {
-  if (!driverStopsContainer || !driverSelect) return;
-  const selectedTruckId = driverSelect.value;
-  const truck = fleetData.find(t => t.id === selectedTruckId);
-  driverStopsContainer.innerHTML = '';
-
-  truck.stops.forEach((stop, index) => {
-    const isCurrent = index === truck.currentStopIndex;
-    const isDone = stop.status === 'Completed';
-
-    const card = document.createElement('div');
-    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/10' : 'border-gcr-border/40 bg-black/20'} flex items-center justify-between gap-3`;
-    card.innerHTML = `
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'}">Stop ${index + 1}: ${stop.name}</span>
-          ${isCurrent ? '<span class="text-[9px] bg-gcr text-white font-bold px-1.5 py-0.2 rounded">NEXT</span>' : ''}
-        </div>
-        <p class="text-[11px] text-slate-400 mt-0.5">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
-      </div>
-      <div>
-        ${isCurrent ? `
-          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer">
-            Mark Delivered
-          </button>
-        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Done</span>' : '<span class="text-xs text-slate-500">Upcoming</span>'}
-      </div>
-    `;
-    driverStopsContainer.appendChild(card);
-  });
-}
-
-if (driverSelect) {
-  driverSelect.addEventListener('change', renderDriverStops);
-}
-
-window.markStopCompleted = function(truckId, stopIndex) {
-  const truck = fleetData.find(t => t.id === truckId);
-  truck.stops[stopIndex].status = 'Completed';
-  if (truck.currentStopIndex < truck.stops.length - 1) {
-    truck.currentStopIndex += 1;
-    truck.stops[truck.currentStopIndex].status = 'In Transit';
-    const nextStop = truck.stops[truck.currentStopIndex];
-    drawInAppRoute(truck.lat, truck.lng, nextStop.lat, nextStop.lng, nextStop.name);
-  }
-  renderDriverStops();
-  renderAdminDashboard();
-};
-
-// Driver GPS Broadcasting Engine
-let watchId = null;
-const btnGps = document.getElementById('btn-toggle-gps');
-const gpsBadge = document.getElementById('gps-status-badge');
-const telemetry = document.getElementById('driver-telemetry');
-const coordsTxt = document.getElementById('telemetry-coords');
-const speedTxt = document.getElementById('telemetry-speed');
-
-if (btnGps) {
-  btnGps.addEventListener('click', () => {
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
-      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
-      gpsBadge.innerText = 'GPS Offline';
-      telemetry.classList.add('hidden');
-    } else {
-      if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
-      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
-      gpsBadge.innerText = 'GPS Broadcasting Live';
-      btnGps.innerHTML = '<span>⏹️</span> Stop Sharing GPS';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
-      telemetry.classList.remove('hidden');
-
-      watchId = navigator.geolocation.watchPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
-
-        coordsTxt.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        speedTxt.innerText = `${spd} km/h`;
-
-        const truck = fleetData.find(t => t.id === driverSelect.value);
-        if (truck) {
-          truck.lat = lat;
-          truck.lng = lng;
-          truck.speed = spd;
-          const activeStop = truck.stops[truck.currentStopIndex];
-          if (activeStop) {
-            drawInAppRoute(truck.lat, truck.lng, activeStop.lat, activeStop.lng, activeStop.name);
-          }
-          renderAdminDashboard();
-        }
-      }, (err) => console.error(err), { enableHighAccuracy: true });
-    }
-  });
-}
-
-// ==================== PAGE 4: COLD CHAIN CARDS ====================
+// Cold Chain Compliance Cards
 function renderColdChainCards() {
   const container = document.getElementById('coldchain-cards');
   if (!container) return;
@@ -410,12 +593,13 @@ function renderColdChainCards() {
     card.className = "glass-panel p-4 rounded-xl space-y-2 border border-gcr-border/40 shadow-lg";
     card.innerHTML = `
       <div class="flex justify-between items-center">
-        <span class="font-display font-bold text-sm text-white">${truck.id}</span>
+        <span class="font-display font-bold text-sm text-white">${truck.id} (${truck.plate})</span>
         <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
       </div>
-      <p class="text-xs text-slate-300">📦 Cargo: ${truck.cargo}</p>
+      <p class="text-xs text-slate-300">Driver: <span class="text-white">${truck.driver}</span></p>
+      <p class="text-xs text-slate-400 truncate">📦 ${truck.cargo}</p>
       <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
-        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Reefer Compressor Optimal
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Compressor Normal
       </div>
     `;
     container.appendChild(card);
@@ -423,4 +607,5 @@ function renderColdChainCards() {
 }
 
 // Initial Boot
+populateTruckDropdowns();
 renderAdminDashboard();
