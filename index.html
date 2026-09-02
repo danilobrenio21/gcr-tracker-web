@@ -3,32 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GCR Food Products Trading — Logistics & Fleet Portal</title>
+  <title>GCR Food Products Trading — Logistics Fleet & Route Command</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Leaflet In-App Turn-by-Turn Routing Engine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
   <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['Outfit', 'sans-serif']
+          },
           colors: {
             gcr: {
               DEFAULT: '#4AADE3',
-              dark: '#2A93CC',
+              glow: '#38bdf8',
+              dark: '#1e8bc3',
               light: '#EBF6FC',
-              navy: '#0B131B',
-              surface: '#131F2C',
-              card: '#192838',
-              border: '#24374E'
+              bg: '#070D14',
+              surface: 'rgba(15, 25, 38, 0.75)',
+              card: 'rgba(21, 35, 52, 0.65)',
+              cardHover: 'rgba(28, 46, 68, 0.85)',
+              border: 'rgba(74, 173, 227, 0.22)'
             }
           }
         }
@@ -37,309 +44,335 @@
   </script>
 
   <style>
-    #map { height: 100%; width: 100%; border-radius: 1rem; z-index: 10; }
-    .leaflet-popup-content-wrapper {
-      background: #192838 !important;
-      color: #f1f5f9 !important;
-      border: 1px solid #24374E;
-      border-radius: 0.75rem;
+    body {
+      background: radial-gradient(circle at 10% 10%, #0d1a29 0%, #060a10 100%);
     }
-    .leaflet-popup-tip { background: #192838 !important; }
 
-    /* In-App Routing Instructions Panel Style */
+    #map {
+      height: 100%;
+      width: 100%;
+      border-radius: 1.25rem;
+      z-index: 10;
+    }
+
+    .glass-panel {
+      background: rgba(15, 25, 38, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(74, 173, 227, 0.2);
+    }
+
+    /* Custom Futuristic Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(74, 173, 227, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4AADE3; }
+
+    /* Routing container dark glass style */
     .leaflet-routing-container {
-      background: #192838 !important;
-      color: #f1f5f9 !important;
-      border: 1px solid #24374E !important;
-      border-radius: 0.75rem !important;
+      background: rgba(13, 22, 33, 0.9) !important;
+      backdrop-filter: blur(12px) !important;
+      color: #e2e8f0 !important;
+      border: 1px solid rgba(74, 173, 227, 0.35) !important;
+      border-radius: 1rem !important;
       font-size: 11px !important;
       max-height: 220px;
-      overflow-y: auto;
-      z-index: 999 !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+      z-index: 990 !important;
     }
-    .leaflet-routing-alt {
-      border-color: #24374E !important;
-    }
-    .leaflet-routing-alt tr:hover {
-      background: #24374E !important;
-    }
+    .leaflet-routing-alt { border-color: rgba(74, 173, 227, 0.2) !important; }
+    .leaflet-routing-alt tr:hover { background: rgba(74, 173, 227, 0.15) !important; }
 
-    /* Drawer Animation */
+    /* Nav Drawer */
     #nav-drawer {
       position: fixed;
       top: 0;
       bottom: 0;
       left: 0;
-      width: 290px;
+      width: 300px;
       transform: translateX(-100%);
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 99999;
     }
-    #nav-drawer.active {
-      transform: translateX(0) !important;
-    }
+    #nav-drawer.active { transform: translateX(0) !important; }
     #drawer-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(4, 8, 14, 0.75);
+      backdrop-filter: blur(6px);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.28s ease;
+      transition: opacity 0.3s ease;
       z-index: 99998;
     }
-    #drawer-backdrop.active {
-      opacity: 1 !important;
-      pointer-events: auto !important;
-    }
+    #drawer-backdrop.active { opacity: 1 !important; pointer-events: auto !important; }
   </style>
 </head>
-<body class="bg-gcr-navy text-slate-100 min-h-screen flex flex-col font-sans selection:bg-gcr selection:text-white">
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-gcr selection:text-white font-sans overflow-x-hidden">
 
-  <!-- TOP APP BAR -->
-  <header class="border-b border-gcr-border bg-gcr-surface/90 backdrop-blur-md px-4 md:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40">
-    <div class="flex items-center gap-3">
+  <header class="border-b border-gcr-border/40 glass-panel px-4 md:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+    <div class="flex items-center gap-3.5">
       <button 
         id="btn-menu-open" 
         onclick="toggleDrawer(true)" 
         type="button" 
-        class="p-2.5 rounded-xl bg-gcr-card border border-gcr-border hover:border-gcr text-white focus:outline-none transition cursor-pointer flex items-center justify-center active:scale-95"
+        class="p-2.5 rounded-xl bg-gcr-card hover:bg-gcr-cardHover border border-gcr-border text-white hover:border-gcr transition cursor-pointer flex items-center justify-center active:scale-95 shadow-md shadow-black/40"
       >
-        <svg class="w-6 h-6 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 pointer-events-none text-gcr" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
 
-      <!-- Official Logo Container -->
       <div class="flex items-center gap-3">
-        <div class="h-10 px-2 py-1 bg-white rounded-xl flex items-center justify-center shadow-md shadow-gcr/20 border border-slate-200">
-          <img src="logo.jpg" alt="GCR Food Products Trading Logo" class="h-8 w-auto object-contain" onerror="this.style.display='none'" />
+        <div class="h-10 px-2.5 py-1 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-gcr/10 border border-white/20 ring-1 ring-gcr/30">
+          <img src="logo.jpg" alt="GCR Food Products Logo" class="h-8 w-auto object-contain" onerror="this.style.display='none'" />
         </div>
         <div>
-          <h1 class="font-bold text-sm md:text-base leading-tight tracking-tight text-white">GCR Food Products</h1>
-          <p id="page-subtitle" class="text-[11px] text-gcr font-medium">Live Fleet Dispatch Map</p>
+          <h1 class="font-display font-extrabold text-sm md:text-base tracking-tight text-white flex items-center gap-1.5">
+            GCR Logistics <span class="text-[10px] px-2 py-0.5 rounded-full bg-gcr/20 border border-gcr/40 text-gcr font-semibold tracking-wide uppercase">Hub</span>
+          </h1>
+          <p id="page-subtitle" class="text-[11px] text-slate-400 font-medium">Navotas Central Route & Fleet Command</p>
         </div>
       </div>
     </div>
 
-    <!-- Quick Link Button -->
-    <div class="flex items-center gap-2">
-      <button onclick="navigatePage('page-operator', 'Operator Manifest Portal')" class="text-xs bg-gcr hover:bg-gcr-dark px-3 py-1.5 rounded-xl font-bold text-white shadow transition flex items-center gap-1.5 cursor-pointer">
-        <span>📝</span> Driver Manifest
+    <div class="flex items-center gap-2.5">
+      <button onclick="navigatePage('page-operator', 'Operator Manifest Portal')" class="text-xs bg-gradient-to-r from-sky-500 to-gcr hover:from-sky-400 hover:to-gcr-dark px-3.5 py-2 rounded-xl font-bold text-white shadow-lg shadow-sky-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer border border-sky-400/40">
+        <span>📝</span> Create Manifest
       </button>
     </div>
   </header>
 
-  <!-- BACKDROP OVERLAY -->
   <div id="drawer-backdrop" onclick="toggleDrawer(false)"></div>
 
-  <!-- NAVIGATION DRAWER -->
-  <aside id="nav-drawer" class="bg-gcr-surface border-r border-gcr-border flex flex-col justify-between shadow-2xl">
+  <aside id="nav-drawer" class="glass-panel border-r border-gcr-border flex flex-col justify-between shadow-2xl">
     <div>
-      <div class="p-4 border-b border-gcr-border flex items-center justify-between">
+      <div class="p-4 border-b border-gcr-border/40 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="h-8 px-2 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+          <div class="h-8 px-2 bg-white/95 rounded-lg flex items-center justify-center border border-white/20">
             <img src="logo.jpg" alt="GCR Logo" class="h-6 w-auto object-contain" onerror="this.style.display='none'" />
           </div>
-          <span class="font-bold text-sm text-white">Portal Navigation</span>
+          <span class="font-display font-bold text-sm text-white">System Menu</span>
         </div>
         <button onclick="toggleDrawer(false)" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-gcr-card transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
-      <nav class="p-3 space-y-1.5">
-        <button onclick="navigatePage('page-map', 'Live Fleet Dispatch Map')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-white bg-gcr/20 border border-gcr/30 hover:bg-gcr transition text-left cursor-pointer">
+      <nav class="p-3 space-y-1.5 font-medium">
+        <button onclick="navigatePage('page-map', 'Live Fleet & Road Search Map')" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-white bg-gcr/25 border border-gcr/40 hover:bg-gcr transition text-left cursor-pointer shadow-sm">
           <span class="text-base">🗺️</span>
-          <span>Live Fleet Map</span>
+          <span>Google-Style Map & Search</span>
         </button>
 
-        <button onclick="navigatePage('page-operator', 'Operator Manifest & Load Entry')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-gcr border border-gcr/40 bg-gcr/10 hover:bg-gcr hover:text-white transition text-left cursor-pointer">
-          <span class="text-base">📝</span>
+        <button onclick="navigatePage('page-operator', 'Operator Manifest & Load Entry')" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
+          <span class="text-base">📋</span>
           <span>Driver / Cargo Manifest</span>
         </button>
 
-        <button onclick="navigatePage('page-driver', 'Driver GPS & Drop-off Tracker')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white transition text-left cursor-pointer">
+        <button onclick="navigatePage('page-driver', 'Driver GPS & Drop-off Tracker')" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
           <span class="text-base">📡</span>
-          <span>Live GPS & Checkoffs</span>
+          <span>Driver GPS Broadcast</span>
         </button>
 
-        <button onclick="navigatePage('page-coldchain', 'Reefer Temp Compliance')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white transition text-left cursor-pointer">
+        <button onclick="navigatePage('page-coldchain', 'Reefer Temp Compliance')" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
           <span class="text-base">❄️</span>
-          <span>Cold Chain & Temp Logs</span>
+          <span>Cold Chain & Temp Sensors</span>
         </button>
 
-        <button onclick="navigatePage('page-hub', 'Navotas Facility Profile')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white transition text-left cursor-pointer">
+        <button onclick="navigatePage('page-hub', 'Navotas Facility Profile')" type="button" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
           <span class="text-base">🏢</span>
-          <span>Hub & Operations Info</span>
+          <span>Facility Profile & Contact</span>
         </button>
       </nav>
     </div>
 
-    <div class="p-4 border-t border-gcr-border bg-gcr-card/50">
-      <p class="text-[11px] font-bold text-white">GCR Food Products Trading</p>
+    <div class="p-4 border-t border-gcr-border/40 bg-black/20">
+      <p class="text-[11px] font-display font-bold text-white">GCR Food Products Trading</p>
       <p class="text-[10px] text-slate-400">578 Gov. A. Pascual St., San Roque, Navotas</p>
-      <p class="text-[10px] text-gcr mt-1 font-mono">Landline: 8634-7097</p>
+      <p class="text-[10px] text-gcr mt-1 font-mono font-semibold">📞 8634-7097</p>
     </div>
   </aside>
 
-  <!-- ==================== PAGES ==================== -->
-
-  <!-- PAGE 1: ADMIN LIVE MAP -->
-  <div id="page-map" class="page-content flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-6 overflow-hidden">
-    <section class="space-y-4 flex flex-col h-full">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Live Reefer Fleet</h2>
-        <span id="truck-count" class="text-xs bg-gcr-card border border-gcr-border px-2.5 py-0.5 rounded-full text-gcr font-semibold">3 Units Active</span>
+  <div id="page-map" class="page-content flex-1 grid grid-cols-1 lg:grid-cols-3 gap-5 p-4 md:p-6 overflow-hidden">
+    
+    <section class="space-y-3.5 flex flex-col h-full">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <span class="h-2 w-2 rounded-full bg-gcr animate-ping"></span> Active Reefer Fleet
+        </h2>
+        <span id="truck-count" class="text-xs glass-panel px-3 py-1 rounded-full text-gcr font-semibold">3 Trucks Live</span>
       </div>
-      <div id="fleet-list" class="space-y-3.5 flex-1 overflow-y-auto pr-1"></div>
+
+      <div id="fleet-list" class="space-y-3 flex-1 overflow-y-auto pr-1"></div>
     </section>
-    <section class="lg:col-span-2 bg-gcr-surface border border-gcr-border p-2.5 rounded-2xl flex flex-col min-h-[480px] shadow-2xl relative">
+
+    <section class="lg:col-span-2 glass-panel p-2 rounded-2xl flex flex-col min-h-[500px] shadow-2xl relative border border-gcr-border/40 overflow-hidden">
+      
+      <div class="absolute top-4 left-4 right-4 z-[995] max-w-lg">
+        <div class="glass-panel rounded-2xl p-2 shadow-2xl border border-white/20 ring-1 ring-gcr/30 flex items-center gap-2">
+          <span class="text-gcr text-lg pl-2">🔍</span>
+          <input 
+            id="map-search-input" 
+            type="text" 
+            placeholder="Search destination anywhere in PH (e.g. Balintawak, Cubao, Divisoria)..." 
+            class="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none py-1.5 px-1 font-medium"
+            onkeydown="if(event.key==='Enter') executeMapSearch()"
+          />
+          <button 
+            onclick="executeMapSearch()" 
+            class="bg-gcr hover:bg-gcr-dark text-white font-bold text-xs px-3.5 py-1.5 rounded-xl transition shadow-md shadow-gcr/30 active:scale-95 cursor-pointer whitespace-nowrap"
+          >
+            Route
+          </button>
+        </div>
+
+        <div id="search-results-box" class="hidden glass-panel mt-1.5 rounded-xl border border-gcr-border shadow-2xl max-h-48 overflow-y-auto divide-y divide-white/5"></div>
+      </div>
+
       <div id="map"></div>
     </section>
   </div>
 
-  <!-- PAGE 2: OPERATOR MANIFEST -->
   <div id="page-operator" class="page-content hidden flex-1 max-w-3xl w-full mx-auto p-4 md:p-6 space-y-6">
-    <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl space-y-5">
-      <div class="border-b border-gcr-border pb-3">
-        <h2 class="text-base font-bold text-white flex items-center gap-2">
-          <span>📦</span> Cargo Manifest & Trip Departure Portal
-        </h2>
-        <p class="text-xs text-slate-400 mt-1">Truck operators log cargo loads and multiple delivery drop-offs before departure.</p>
+    <div class="glass-panel p-6 rounded-2xl shadow-2xl space-y-5 border border-gcr-border/40">
+      <div class="border-b border-gcr-border/40 pb-3 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-display font-extrabold text-white flex items-center gap-2">
+            <span>📦</span> Trip Dispatch & Multi-Drop Manifest
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Assign refrigerated cargo loads and custom destination drop points.</p>
+        </div>
+        <span class="text-[11px] bg-gcr/10 text-gcr border border-gcr/30 px-3 py-1 rounded-full font-semibold">Navotas Hub Inbound</span>
       </div>
 
       <form id="form-operator-manifest" onsubmit="handleManifestSubmit(event)" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Select Truck</label>
-            <select id="man-truck-id" class="w-full bg-gcr-card border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
-              <option value="REEFER-01">REEFER-01 (Plate: NDG-4421)</option>
-              <option value="REEFER-02">REEFER-02 (Plate: CBC-8902)</option>
-              <option value="REEFER-03">REEFER-03 (Plate: TGC-1198)</option>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assign Reefer Unit</label>
+            <select id="man-truck-id" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
+              <option value="REEFER-01">REEFER-01 (Plate: NDG-4421) — 4-Ton Freezer</option>
+              <option value="REEFER-02">REEFER-02 (Plate: CBC-8902) — 6-Ton Chiller</option>
+              <option value="REEFER-03">REEFER-03 (Plate: TGC-1198) — 3-Ton High-Deck</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Assigned Driver Name</label>
-            <input id="man-driver-name" type="text" required placeholder="e.g. Danilo Brenio Jr." class="w-full bg-gcr-card border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assigned Driver Name</label>
+            <input id="man-driver-name" type="text" required placeholder="e.g. Danilo Brenio Jr." class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none placeholder-slate-500">
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Cargo Inventory Details</label>
-            <input id="man-cargo" type="text" required placeholder="e.g., 20 Boxes Frozen Bangus, 10 Sacks Tahong" class="w-full bg-gcr-card border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Cargo Inventory Description</label>
+            <input id="man-cargo" type="text" required placeholder="e.g. 50 Cartons Frozen Bangus, 20 Sacks Tahong" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none placeholder-slate-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Cargo Cold Range Setpoint</label>
-            <select id="man-temp" class="w-full bg-gcr-card border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
-              <option value="-20.0">Deep Frozen (-20°C) — Fish Blocks & Meats</option>
-              <option value="-15.0">Standard Frozen (-15°C) — Shellfish / Squid</option>
-              <option value="2.0">Chilled (0°C to 4°C) — Fresh Catch / Live Tahong</option>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Target Temperature Setpoint</label>
+            <select id="man-temp" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
+              <option value="-20.0">Deep Frozen (-20°C) — Fish Blocks, Pork, Beef</option>
+              <option value="-15.0">Standard Frozen (-15°C) — Squid & Shrimps</option>
+              <option value="2.0">Chilled (0°C to 4°C) — Live Tahong & Fresh Catch</option>
             </select>
           </div>
         </div>
 
-        <div class="border-t border-gcr-border pt-4">
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">Delivery Drop-Off Stops (Ordered)</label>
-            <button type="button" onclick="addStopInputRow()" class="text-xs bg-gcr/20 border border-gcr/40 hover:bg-gcr text-gcr hover:text-white px-3 py-1 rounded-lg font-bold transition cursor-pointer">
-              + Add Another Drop-off
+        <div class="border-t border-gcr-border/40 pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">Delivery Drop-Off Locations</label>
+            <button type="button" onclick="addStopInputRow()" class="text-xs bg-gcr/15 border border-gcr/40 hover:bg-gcr text-gcr hover:text-white px-3 py-1.5 rounded-xl font-bold transition active:scale-95 cursor-pointer">
+              + Add Another Destination
             </button>
           </div>
 
-          <div id="stops-input-container" class="space-y-2">
-            <div class="flex items-center gap-2 stop-row">
+          <div id="stops-input-container" class="space-y-2.5">
+            <div class="flex items-center gap-2.5 stop-row">
               <span class="text-xs text-gcr font-bold w-16">Stop 1:</span>
-              <input type="text" required placeholder="e.g., Balintawak Wholesale Market Bay 3" class="stop-name-input flex-1 bg-gcr-card border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
+              <input type="text" required placeholder="e.g. Balintawak Wholesale Market Bay 4" class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
               <button type="button" onclick="removeStopRow(this)" class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
             </div>
-            <div class="flex items-center gap-2 stop-row">
+            <div class="flex items-center gap-2.5 stop-row">
               <span class="text-xs text-gcr font-bold w-16">Stop 2:</span>
-              <input type="text" placeholder="e.g., Munoz Market Wet Section Stall #12" class="stop-name-input flex-1 bg-gcr-card border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
+              <input type="text" placeholder="e.g. Munoz Wet Market Cold Store Stall #12" class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
               <button type="button" onclick="removeStopRow(this)" class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-gcr hover:bg-gcr-dark text-white font-bold text-sm rounded-xl transition shadow-lg shadow-gcr/20 cursor-pointer flex items-center justify-center gap-2">
-          <span>🚀</span> Dispatch Truck & Update Live Dashboard
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-gcr hover:from-sky-400 hover:to-gcr-dark text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-xl shadow-gcr/25 active:scale-98 cursor-pointer flex items-center justify-center gap-2">
+          <span>🚀</span> Dispatch Reefer & Project Live Navigation
         </button>
       </form>
     </div>
   </div>
 
-  <!-- PAGE 3: DRIVER LIVE GPS -->
   <div id="page-driver" class="page-content hidden flex-1 max-w-xl w-full mx-auto p-4 md:p-6 space-y-5">
-    <div class="bg-gcr-surface border border-gcr-border rounded-2xl p-6 shadow-xl space-y-4">
+    <div class="glass-panel p-6 rounded-2xl shadow-2xl space-y-4 border border-gcr-border/40">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-base font-bold text-white">Driver Navigation Terminal</h2>
-          <p class="text-xs text-slate-400">Share live GPS coordinates with Navotas Dispatch</p>
+          <h2 class="text-base font-display font-bold text-white">Driver Navigation Terminal</h2>
+          <p class="text-xs text-slate-400">Continuous GPS broadcast to Navotas Headquarters</p>
         </div>
-        <span id="gps-status-badge" class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+        <span id="gps-status-badge" class="px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
           GPS Offline
         </span>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase">Select Truck Unit</label>
-        <select id="driver-truck-select" class="w-full bg-gcr-card border border-gcr-border rounded-xl px-4 py-2.5 text-xs text-white">
-          <option value="REEFER-01">REEFER-01</option>
-          <option value="REEFER-02">REEFER-02</option>
-          <option value="REEFER-03">REEFER-03</option>
+        <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase">Select Your Assigned Unit</label>
+        <select id="driver-truck-select" class="w-full bg-black/40 border border-gcr-border rounded-xl px-4 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
+          <option value="REEFER-01">REEFER-01 — Danilo B.</option>
+          <option value="REEFER-02">REEFER-02 — Reynaldo S.</option>
+          <option value="REEFER-03">REEFER-03 — Arnel M.</option>
         </select>
       </div>
 
-      <button id="btn-toggle-gps" class="w-full py-3 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+      <button id="btn-toggle-gps" class="w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg shadow-gcr/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
         <span>📡</span> Start Sharing Live GPS
       </button>
 
-      <div id="driver-telemetry" class="hidden text-xs bg-gcr-card p-3 rounded-xl border border-gcr-border space-y-1 text-slate-300">
-        <p>Live Coordinates: <span id="telemetry-coords" class="font-mono text-gcr">Detecting...</span></p>
-        <p>Speed: <span id="telemetry-speed" class="font-mono text-emerald-400">0 km/h</span></p>
+      <div id="driver-telemetry" class="hidden text-xs bg-black/30 p-3.5 rounded-xl border border-gcr-border/50 space-y-1.5 text-slate-300">
+        <p class="flex justify-between"><span>Current Coordinates:</span> <span id="telemetry-coords" class="font-mono text-gcr font-semibold">Detecting...</span></p>
+        <p class="flex justify-between"><span>Vehicle Speed:</span> <span id="telemetry-speed" class="font-mono text-emerald-400 font-semibold">0 km/h</span></p>
       </div>
     </div>
 
-    <div class="bg-gcr-surface border border-gcr-border rounded-2xl p-6 shadow-xl space-y-4">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Active Delivery Stops</h3>
+    <div class="glass-panel p-6 rounded-2xl shadow-2xl space-y-4 border border-gcr-border/40">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Active Delivery Drops</h3>
       <div id="driver-stops-list" class="space-y-3"></div>
     </div>
   </div>
 
-  <!-- PAGE 4: COLD CHAIN COMPLIANCE -->
   <div id="page-coldchain" class="page-content hidden flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 space-y-5">
-    <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl">
-      <h2 class="text-base font-bold text-white">Cold Chain Standards & Alerts</h2>
-      <p class="text-xs text-slate-400 mb-4">Live reefer box temperatures for fish, meat, and shellfish products</p>
+    <div class="glass-panel p-6 rounded-2xl shadow-2xl border border-gcr-border/40">
+      <h2 class="text-base font-display font-bold text-white">Cold Chain Live Compliance</h2>
+      <p class="text-xs text-slate-400 mb-5">Continuous digital temperature readings from cargo reefer units</p>
       <div id="coldchain-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
     </div>
   </div>
 
-  <!-- PAGE 5: FACILITY INFO -->
   <div id="page-hub" class="page-content hidden flex-1 max-w-3xl w-full mx-auto p-4 md:p-6 space-y-5">
-    <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl space-y-4">
-      <div class="flex items-center gap-4 border-b border-gcr-border pb-4">
-        <div class="h-16 px-3 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-slate-200">
+    <div class="glass-panel p-6 rounded-2xl shadow-2xl space-y-4 border border-gcr-border/40">
+      <div class="flex items-center gap-4 border-b border-gcr-border/40 pb-4">
+        <div class="h-16 px-3 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
           <img src="logo.jpg" alt="GCR Food Products" class="h-12 w-auto object-contain" />
         </div>
         <div>
-          <h2 class="text-lg font-bold text-white">GCR Food Products Trading</h2>
-          <p class="text-xs text-gcr font-medium">Frozen Fish, Shells & Quality Meats Logistics</p>
+          <h2 class="text-lg font-display font-extrabold text-white">GCR Food Products Trading</h2>
+          <p class="text-xs text-gcr font-medium">Frozen Seafood, Shellfish & Premium Meats Distribution</p>
         </div>
       </div>
-      <div class="text-xs text-slate-300 space-y-2">
-        <p>📍 <b class="text-white">Facility Address:</b> 578 Gov. A. Pascual St., San Roque, Navotas City</p>
-        <p>📧 <b class="text-white">Email:</b> gcrfoodproducts@gmail.com</p>
-        <p>☎️ <b class="text-white">Landline:</b> 8634-7097</p>
-        <p>🕒 <b class="text-white">Dispatch Operations:</b> 24/7 Navotas Fish Port Inbound & Outbound Transport</p>
+      <div class="text-xs text-slate-300 space-y-3 pt-2">
+        <p class="flex items-center gap-2">📍 <b class="text-white">Facility Hub:</b> 578 Gov. A. Pascual St., San Roque, Navotas City</p>
+        <p class="flex items-center gap-2">📧 <b class="text-white">Direct Email:</b> gcrfoodproducts@gmail.com</p>
+        <p class="flex items-center gap-2">☎️ <b class="text-white">Landline Dispatch:</b> 8634-7097</p>
+        <p class="flex items-center gap-2">🕒 <b class="text-white">Operations:</b> 24/7 Navotas Fish Port Inbound Cold Chain Delivery</p>
       </div>
     </div>
   </div>
 
-  <!-- INLINE GUARANTEED DRAWER CONTROLS -->
   <script>
     function toggleDrawer(open) {
       const drawer = document.getElementById('nav-drawer');
@@ -354,6 +387,6 @@
     }
   </script>
 
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=5.0"></script>
 </body>
 </html>
