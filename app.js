@@ -1,7 +1,7 @@
 // Navotas Central Hub Coordinates
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Initialize Map
+// Initialize Leaflet Map
 const map = L.map('map', { 
   zoomControl: false,
   tap: false
@@ -188,7 +188,7 @@ function initManifestDriverSync() {
   }
 }
 
-// In-App Turn Routing
+// In-App Turn Routing - Strips out disruptive itinerary panels completely
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
@@ -199,7 +199,8 @@ function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
     routeWhileDragging: false,
     addWaypoints: false,
     showAlternatives: false,
-    collapsible: true,
+    collapsible: false,
+    createControl: false, // Prevents leaflet from rendering turn instruction lists
     lineOptions: {
       styles: [
         { color: '#0369a1', opacity: 0.8, weight: 5 },
@@ -215,43 +216,26 @@ function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   }).addTo(map);
 }
 
-// OpenStreetMap Geocoding Search
+// Clean Search - Routes straight to the map without suggestion overlays
 async function executeMapSearch() {
   const input = document.getElementById('map-search-input');
   const query = input.value.trim();
-  const resultsBox = document.getElementById('search-results-box');
   if (!query) return;
 
-  resultsBox.classList.remove('hidden');
-  resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">Searching road network...</div>`;
-
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=4`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=1`);
     const data = await res.json();
 
-    resultsBox.innerHTML = '';
-    if (data.length === 0) {
-      resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">No destination points found.</div>`;
-      return;
+    if (data && data.length > 0) {
+      const destLat = parseFloat(data[0].lat);
+      const destLng = parseFloat(data[0].lon);
+      drawInAppRoute(NAVOTAS_CENTER[0], NAVOTAS_CENTER[1], destLat, destLng, data[0].display_name.split(',')[0]);
+      map.flyTo([destLat, destLng], 14, { animate: true });
+    } else {
+      alert('Location not found. Please try another address.');
     }
-
-    data.forEach(item => {
-      const div = document.createElement('div');
-      div.className = "p-2 hover:bg-white/[0.05] text-xs text-slate-300 cursor-pointer transition truncate";
-      div.innerText = item.display_name;
-      div.onclick = () => {
-        const destLat = parseFloat(item.lat);
-        const destLng = parseFloat(item.lon);
-        resultsBox.classList.add('hidden');
-        input.value = item.display_name.split(',')[0];
-
-        drawInAppRoute(NAVOTAS_CENTER[0], NAVOTAS_CENTER[1], destLat, destLng, item.display_name.split(',')[0]);
-        map.flyTo([destLat, destLng], 14, { animate: true });
-      };
-      resultsBox.appendChild(div);
-    });
   } catch (err) {
-    resultsBox.innerHTML = `<div class="p-2.5 text-xs text-rose-400">Lookup service error.</div>`;
+    alert('Lookup service error. Please try again.');
   }
 }
 
@@ -675,6 +659,6 @@ window.addEventListener('resize', () => {
   if (map) map.invalidateSize();
 });
 
-// Initial Boot
+// Initial boot
 initManifestDriverSync();
 renderAdminDashboard();
