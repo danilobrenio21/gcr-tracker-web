@@ -12,6 +12,10 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Leaflet In-App Turn-by-Turn Routing Engine -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -41,6 +45,24 @@
       border-radius: 0.75rem;
     }
     .leaflet-popup-tip { background: #192838 !important; }
+
+    /* In-App Routing Instructions Panel Style */
+    .leaflet-routing-container {
+      background: #192838 !important;
+      color: #f1f5f9 !important;
+      border: 1px solid #24374E !important;
+      border-radius: 0.75rem !important;
+      font-size: 11px !important;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 999 !important;
+    }
+    .leaflet-routing-alt {
+      border-color: #24374E !important;
+    }
+    .leaflet-routing-alt tr:hover {
+      background: #24374E !important;
+    }
 
     /* Drawer Animation */
     #nav-drawer {
@@ -332,6 +354,6 @@
     }
   </script>
 
-  <script src="app.js?v=3.2"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>
