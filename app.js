@@ -1,10 +1,13 @@
 // Navotas Central Hub baseline
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Initialize Map
-const map = L.map('map').setView(NAVOTAS_CENTER, 12);
+// Initialize Leaflet Map
+const map = L.map('map', { zoomControl: false }).setView(NAVOTAS_CENTER, 12);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// Carto Voyager Clean Navigation Tiles
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
@@ -14,7 +17,7 @@ let fleetData = [
     id: 'REEFER-01',
     plate: 'NDG-4421',
     driver: 'Danilo B.',
-    cargo: '20 Boxes Frozen Bangus & Tilapia',
+    cargo: 'Frozen Bangus & Tilapia Blocks (2.4T)',
     temp: -19.4,
     lat: 14.6560,
     lng: 120.9520,
@@ -29,7 +32,7 @@ let fleetData = [
     id: 'REEFER-02',
     plate: 'CBC-8902',
     driver: 'Reynaldo S.',
-    cargo: 'Imported Pork Belly & Beef Cuts (2.2T)',
+    cargo: 'Imported Pork Belly & Beef Cuts (3.2T)',
     temp: -18.2,
     lat: 14.6390,
     lng: 120.9850,
@@ -59,7 +62,7 @@ let fleetData = [
 const markers = {};
 let activeRoutingControl = null;
 
-// Draw route with real road navigation inside Leaflet
+// ==================== IN-APP ROUTING ENGINE ====================
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
@@ -73,16 +76,64 @@ function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
     routeWhileDragging: false,
     addWaypoints: false,
     showAlternatives: false,
+    collapsible: true,
     lineOptions: {
-      styles: [{ color: '#4AADE3', opacity: 0.85, weight: 6 }]
+      styles: [
+        { color: '#0369a1', opacity: 0.8, weight: 8 },
+        { color: '#38bdf8', opacity: 1, weight: 5 }
+      ]
     },
     createMarker: function(i, wp) {
-      return L.marker(wp.latLng).bindPopup(i === 0 ? "Current Location" : `Next Drop: ${destinationName}`);
+      const isStart = i === 0;
+      return L.marker(wp.latLng).bindPopup(
+        `<div style="font-family:inherit;font-size:12px;"><b>${isStart ? 'Starting Point' : 'Destination'}:</b> ${isStart ? 'Navotas/Truck Position' : destinationName}</div>`
+      );
     }
   }).addTo(map);
 }
 
-// Global Page Router
+// ==================== GOOGLE-STYLE MAP SEARCH ENGINE ====================
+async function executeMapSearch() {
+  const input = document.getElementById('map-search-input');
+  const query = input.value.trim();
+  const resultsBox = document.getElementById('search-results-box');
+  if (!query) return;
+
+  resultsBox.classList.remove('hidden');
+  resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">Searching road addresses in the Philippines...</div>`;
+
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=5`);
+    const data = await res.json();
+
+    resultsBox.innerHTML = '';
+    if (data.length === 0) {
+      resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">No locations found. Try including city name (e.g., 'Balintawak, Quezon City').</div>`;
+      return;
+    }
+
+    data.forEach(item => {
+      const div = document.createElement('div');
+      div.className = "p-2.5 hover:bg-gcr/20 text-xs text-slate-200 cursor-pointer transition flex items-start gap-2";
+      div.innerHTML = `<span class="text-gcr">📍</span> <span class="truncate">${item.display_name}</span>`;
+      div.onclick = () => {
+        const destLat = parseFloat(item.lat);
+        const destLng = parseFloat(item.lon);
+        resultsBox.classList.add('hidden');
+        input.value = item.display_name.split(',')[0];
+
+        // Draw in-app road route from Navotas Central Hub to selected search destination
+        drawInAppRoute(NAVOTAS_CENTER[0], NAVOTAS_CENTER[1], destLat, destLng, item.display_name.split(',')[0]);
+        map.flyTo([destLat, destLng], 14, { animate: true });
+      };
+      resultsBox.appendChild(div);
+    });
+  } catch (err) {
+    resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Search error. Please try again.</div>`;
+  }
+}
+
+// ==================== PAGE ROUTER ====================
 window.navigatePage = function(pageId, pageTitle) {
   document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
 
@@ -116,7 +167,7 @@ function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// Render Page 1: Admin Map
+// ==================== PAGE 1: ADMIN DASHBOARD RENDER ====================
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
   if (!listContainer) return;
@@ -138,7 +189,7 @@ function renderAdminDashboard() {
         <div style="font-weight:bold; color:#4AADE3;">${truck.id} (${truck.plate})</div>
         <div style="font-size:12px; margin-top:3px; color:#e2e8f0;"><b>Driver:</b> ${truck.driver}</div>
         <div style="font-size:12px; color:#e2e8f0;"><b>Next Drop:</b> ${activeStop.name}</div>
-        <div style="font-size:12px; color:#38bdf8;"><b>Direct Distance:</b> ~${eta.distanceKm} km</div>
+        <div style="font-size:12px; color:#38bdf8;"><b>Approx:</b> ~${eta.etaMinutes} mins (${eta.distanceKm} km)</div>
         <div style="font-size:11px; color:#94a3b8; margin-top:3px;">📦 ${truck.cargo}</div>
       </div>
     `);
@@ -148,28 +199,30 @@ function renderAdminDashboard() {
     }
 
     const card = document.createElement('div');
-    card.className = "p-4 rounded-xl border border-gcr-border bg-gcr-card hover:border-gcr transition cursor-pointer shadow-sm group";
+    card.className = "p-4 rounded-2xl glass-panel hover:border-gcr/60 transition duration-200 cursor-pointer shadow-lg group hover:scale-[1.01]";
     card.innerHTML = `
       <div class="flex items-center justify-between mb-2">
-        <span class="font-bold text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
-        <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-sky-500/10 text-gcr border border-gcr/30">
-          ${completedCount}/${truck.stops.length} Delivered
+        <span class="font-display font-bold text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
+        <span class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-sky-500/15 text-gcr border border-gcr/30">
+          ${completedCount}/${truck.stops.length} Drops Done
         </span>
       </div>
-      <div class="text-xs text-slate-300 space-y-1">
+      <div class="text-xs text-slate-300 space-y-1.5">
         <p class="text-[11px] text-slate-400 truncate">📦 ${truck.cargo}</p>
-        <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white">${truck.driver}</span></p>
-        <p class="flex justify-between"><span class="text-slate-400">Temp:</span> <span class="text-sky-300 font-semibold">${truck.temp}°C</span></p>
-        <div class="mt-2 pt-2 border-t border-gcr-border/60">
-          <p class="text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop:</p>
+        <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white font-medium">${truck.driver}</span></p>
+        <p class="flex justify-between"><span class="text-slate-400">Box Temp:</span> <span class="text-sky-300 font-bold font-mono">${truck.temp}°C</span></p>
+        <div class="mt-2.5 pt-2 border-t border-gcr-border/30">
+          <p class="text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop-off:</p>
           <p class="text-white font-medium truncate">${activeStop.name}</p>
-          <p class="text-gcr font-bold mt-1 text-[11px]">🗺️ Tap to render in-app road navigation</p>
+          <p class="text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> ETA: ~${eta.etaMinutes} mins (${eta.distanceKm} km away)
+          </p>
         </div>
       </div>
     `;
 
     card.addEventListener('click', () => {
-      map.flyTo([truck.lat, truck.lng], 13, { animate: true, duration: 1 });
+      map.flyTo([truck.lat, truck.lng], 13, { animate: true });
       markers[truck.id].openPopup();
       drawInAppRoute(truck.lat, truck.lng, activeStop.lat, activeStop.lng, activeStop.name);
     });
@@ -178,17 +231,17 @@ function renderAdminDashboard() {
   });
 }
 
-// Operator Manifest Controls
+// ==================== PAGE 2: OPERATOR DYNAMIC MANIFEST ====================
 let stopRowCount = 2;
 
 window.addStopInputRow = function() {
   stopRowCount++;
   const container = document.getElementById('stops-input-container');
   const row = document.createElement('div');
-  row.className = "flex items-center gap-2 stop-row";
+  row.className = "flex items-center gap-2.5 stop-row";
   row.innerHTML = `
     <span class="text-xs text-gcr font-bold w-16">Stop ${stopRowCount}:</span>
-    <input type="text" required placeholder="Enter destination drop location..." class="stop-name-input flex-1 bg-gcr-card border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
+    <input type="text" required placeholder="Enter destination drop location..." class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
     <button type="button" onclick="removeStopRow(this)" class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
   `;
   container.appendChild(row);
@@ -226,10 +279,7 @@ window.handleManifestSubmit = function(e) {
     }
   });
 
-  if (stopsList.length === 0) {
-    alert('Please enter at least one drop-off stop.');
-    return;
-  }
+  if (stopsList.length === 0) return alert('Please specify a delivery destination.');
 
   const truck = fleetData.find(t => t.id === truckId);
   if (truck) {
@@ -243,10 +293,10 @@ window.handleManifestSubmit = function(e) {
 
   renderAdminDashboard();
   alert(`✅ Manifest Logged for ${truckId}!\nAssigned ${stopsList.length} drop-off stops.`);
-  navigatePage('page-map', 'Live Fleet Dispatch Map');
+  navigatePage('page-map', 'Live Fleet & Road Search Map');
 };
 
-// Driver Telemetry Controls
+// ==================== PAGE 3: DRIVER TELEMETRY ====================
 const driverSelect = document.getElementById('driver-truck-select');
 const driverStopsContainer = document.getElementById('driver-stops-list');
 
@@ -261,7 +311,7 @@ function renderDriverStops() {
     const isDone = stop.status === 'Completed';
 
     const card = document.createElement('div');
-    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/10' : 'border-gcr-border bg-gcr-card'} flex items-center justify-between gap-3`;
+    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/10' : 'border-gcr-border/40 bg-black/20'} flex items-center justify-between gap-3`;
     card.innerHTML = `
       <div>
         <div class="flex items-center gap-2">
@@ -272,10 +322,10 @@ function renderDriverStops() {
       </div>
       <div>
         ${isCurrent ? `
-          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition cursor-pointer">
+          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer">
             Mark Delivered
           </button>
-        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Delivered</span>' : '<span class="text-xs text-slate-500">Pending</span>'}
+        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Done</span>' : '<span class="text-xs text-slate-500">Upcoming</span>'}
       </div>
     `;
     driverStopsContainer.appendChild(card);
@@ -313,16 +363,16 @@ if (btnGps) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
       btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
-      btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
-      gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
       gpsBadge.innerText = 'GPS Offline';
       telemetry.classList.add('hidden');
     } else {
       if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
-      gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
       gpsBadge.innerText = 'GPS Broadcasting Live';
       btnGps.innerHTML = '<span>⏹️</span> Stop Sharing GPS';
-      btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
       telemetry.classList.remove('hidden');
 
       watchId = navigator.geolocation.watchPosition((pos) => {
@@ -349,6 +399,7 @@ if (btnGps) {
   });
 }
 
+// ==================== PAGE 4: COLD CHAIN CARDS ====================
 function renderColdChainCards() {
   const container = document.getElementById('coldchain-cards');
   if (!container) return;
@@ -356,15 +407,15 @@ function renderColdChainCards() {
 
   fleetData.forEach(truck => {
     const card = document.createElement('div');
-    card.className = "bg-gcr-card border border-gcr-border p-4 rounded-xl space-y-2";
+    card.className = "glass-panel p-4 rounded-xl space-y-2 border border-gcr-border/40 shadow-lg";
     card.innerHTML = `
       <div class="flex justify-between items-center">
-        <span class="font-bold text-sm text-white">${truck.id}</span>
+        <span class="font-display font-bold text-sm text-white">${truck.id}</span>
         <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
       </div>
       <p class="text-xs text-slate-300">📦 Cargo: ${truck.cargo}</p>
       <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
-        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Reefer Compressor Active
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Reefer Compressor Optimal
       </div>
     `;
     container.appendChild(card);
