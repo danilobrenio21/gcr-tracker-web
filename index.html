@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GCR Food Products Trading — Cold Chain Fleet Portal</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -42,42 +40,49 @@
     }
     .leaflet-popup-tip { background: #192838 !important; }
 
-    /* Reliable CSS Drawer Transitions */
+    /* Guaranteed Drawer Animation */
     #nav-drawer {
       position: fixed;
       top: 0;
       bottom: 0;
       left: 0;
-      width: 280px;
+      width: 290px;
       transform: translateX(-100%);
-      transition: transform 0.25s ease-in-out;
-      z-index: 9999;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 99999;
     }
-    #nav-drawer.open {
+    #nav-drawer.active {
       transform: translateX(0) !important;
     }
     #drawer-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(3px);
-      display: none;
-      z-index: 9998;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+      z-index: 99998;
     }
-    #drawer-backdrop.open {
-      display: block !important;
+    #drawer-backdrop.active {
+      opacity: 1 !important;
+      pointer-events: auto !important;
     }
   </style>
 </head>
 <body class="bg-gcr-navy text-slate-100 min-h-screen flex flex-col font-sans selection:bg-gcr selection:text-white">
 
-  <!-- TOP APP BAR -->
   <header class="border-b border-gcr-border bg-gcr-surface/90 backdrop-blur-md px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center gap-3">
-      <!-- Hamburger Toggle Button -->
-      <button id="btn-menu-open" onclick="openDrawer()" type="button" class="p-2.5 rounded-xl bg-gcr-card border border-gcr-border hover:border-gcr text-white focus:outline-none transition cursor-pointer">
+      <button 
+        id="btn-menu-open" 
+        onclick="toggleDrawer(true)" 
+        type="button" 
+        aria-label="Open Menu"
+        class="p-2.5 rounded-xl bg-gcr-card border border-gcr-border hover:border-gcr text-white focus:outline-none transition cursor-pointer flex items-center justify-center active:scale-95"
+      >
         <svg class="w-6 h-6 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
 
@@ -101,25 +106,22 @@
     </div>
   </header>
 
-  <!-- BACKDROP OVERLAY -->
-  <div id="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div id="drawer-backdrop" onclick="toggleDrawer(false)"></div>
 
-  <!-- SLIDE-OVER NAVIGATION DRAWER -->
   <aside id="nav-drawer" class="bg-gcr-surface border-r border-gcr-border flex flex-col justify-between shadow-2xl">
     <div>
       <div class="p-5 border-b border-gcr-border flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="h-8 w-8 rounded-lg bg-gcr flex items-center justify-center font-black text-white text-xs">GCR</div>
-          <span class="font-bold text-sm text-white">Fleet Portal Menu</span>
+          <span class="font-bold text-sm text-white">Fleet Operations</span>
         </div>
-        <button id="btn-menu-close" onclick="closeDrawer()" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-gcr-card transition cursor-pointer">
-          <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="toggleDrawer(false)" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-gcr-card transition cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
-      <!-- Navigation Items -->
       <nav class="p-3 space-y-1.5">
         <button onclick="navigatePage('page-map', 'Live Fleet Dispatch Map')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-white bg-gcr/20 border border-gcr/30 hover:bg-gcr transition text-left cursor-pointer">
           <span class="text-base">🗺️</span>
@@ -155,9 +157,6 @@
     </div>
   </aside>
 
-  <!-- ==================== PAGES ==================== -->
-
-  <!-- PAGE 1: LIVE MAP -->
   <div id="page-map" class="page-content flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-6 overflow-hidden">
     <section class="space-y-4 flex flex-col h-full">
       <div class="flex items-center justify-between">
@@ -171,7 +170,6 @@
     </section>
   </div>
 
-  <!-- PAGE 2: MULTI-DROP ROUTE MANAGER -->
   <div id="page-routes" class="page-content hidden flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 space-y-6">
     <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl">
       <h2 class="text-base font-bold text-white">Schedule Multi-Drop Delivery</h2>
@@ -204,7 +202,6 @@
     </div>
   </div>
 
-  <!-- PAGE 3: DRIVER TELEMETRY -->
   <div id="page-driver" class="page-content hidden flex-1 max-w-xl w-full mx-auto p-4 md:p-6 space-y-5">
     <div class="bg-gcr-surface border border-gcr-border rounded-2xl p-6 shadow-xl space-y-4">
       <div class="flex items-center justify-between">
@@ -242,7 +239,6 @@
     </div>
   </div>
 
-  <!-- PAGE 4: COLD CHAIN COMPLIANCE -->
   <div id="page-coldchain" class="page-content hidden flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 space-y-5">
     <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl">
       <h2 class="text-base font-bold text-white">Cold Chain Standards & Alerts</h2>
@@ -251,7 +247,6 @@
     </div>
   </div>
 
-  <!-- PAGE 5: FACILITY INFO -->
   <div id="page-hub" class="page-content hidden flex-1 max-w-3xl w-full mx-auto p-4 md:p-6 space-y-5">
     <div class="bg-gcr-surface border border-gcr-border p-6 rounded-2xl shadow-xl space-y-4">
       <div class="flex items-center gap-4 border-b border-gcr-border pb-4">
@@ -270,6 +265,20 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('nav-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
+      if (open) {
+        drawer.classList.add('active');
+        backdrop.classList.add('active');
+      } else {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+      }
+    }
+  </script>
+
+  <script src="app.js?v=2.1"></script>
 </body>
 </html>
