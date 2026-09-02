@@ -1,14 +1,14 @@
-// Navotas Base Hub
+// Navotas Central Hub baseline
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Leaflet Map Initialization
+// Initialize Map
 const map = L.map('map').setView(NAVOTAS_CENTER, 12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-// Fleet & Multi-Drop Data
+// Fleet & Multi-Drop Initial Data
 let fleetData = [
   {
     id: 'REEFER-01',
@@ -62,41 +62,31 @@ let fleetData = [
 const markers = {};
 const routePolylines = {};
 
-// Drawer Toggle Logic
-const btnMenuOpen = document.getElementById('btn-menu-open');
-const btnMenuClose = document.getElementById('btn-menu-close');
-const navDrawer = document.getElementById('nav-drawer');
-const drawerBackdrop = document.getElementById('drawer-backdrop');
+// ==================== DRAWER CONTROLS ====================
+window.openDrawer = function() {
+  document.getElementById('nav-drawer').classList.add('open');
+  document.getElementById('drawer-backdrop').classList.add('open');
+};
 
-function openDrawer() {
-  navDrawer.classList.remove('-translate-x-full');
-  drawerBackdrop.classList.remove('hidden');
-}
+window.closeDrawer = function() {
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+};
 
-function closeDrawer() {
-  navDrawer.classList.add('-translate-x-full');
-  drawerBackdrop.classList.add('hidden');
-}
-
-btnMenuOpen.addEventListener('click', openDrawer);
-btnMenuClose.addEventListener('click', closeDrawer);
-drawerBackdrop.addEventListener('click', closeDrawer);
-
-// Multi-Page Router Function
+// ==================== PAGE ROUTER ====================
 window.navigatePage = function(pageId, pageTitle) {
-  // Hide all pages
+  // Hide all sections
   document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
 
-  // Show selected page
+  // Reveal selected section
   const targetPage = document.getElementById(pageId);
   if (targetPage) targetPage.classList.remove('hidden');
 
-  // Update header title
   document.getElementById('page-subtitle').innerText = pageTitle;
 
-  // Refresh map tiles if navigating back to map
+  // Viewport refreshes per page
   if (pageId === 'page-map') {
-    setTimeout(() => map.invalidateSize(), 150);
+    setTimeout(() => map.invalidateSize(), 200);
   } else if (pageId === 'page-routes') {
     renderRoutesTable();
   } else if (pageId === 'page-driver') {
@@ -105,26 +95,27 @@ window.navigatePage = function(pageId, pageTitle) {
     renderColdChainCards();
   }
 
-  closeDrawer();
+  window.closeDrawer();
 };
 
-// Distance & ETA Calculator
+// ==================== CALCULATION HELPERS ====================
 function calculateETA(lat1, lon1, lat2, lon2, speedKmH) {
-  const R = 6371;
+  const R = 6371; // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const effectiveSpeed = speedKmH > 10 ? speedKmH : 25;
+  const effectiveSpeed = speedKmH > 10 ? speedKmH : 25; // default urban transit speed
   const minutes = Math.round((d / effectiveSpeed) * 60);
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// Render Page 1: Admin Map & Sidebar
+// ==================== PAGE 1: ADMIN MAP ====================
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
+  if (!listContainer) return;
   listContainer.innerHTML = '';
 
   fleetData.forEach((truck) => {
@@ -132,6 +123,7 @@ function renderAdminDashboard() {
     const completedCount = truck.stops.filter(s => s.status === 'Completed').length;
     const eta = calculateETA(truck.lat, truck.lng, activeStop.lat, activeStop.lng, truck.speed);
 
+    // Update or add map marker
     if (!markers[truck.id]) {
       markers[truck.id] = L.marker([truck.lat, truck.lng]).addTo(map);
     } else {
@@ -147,6 +139,7 @@ function renderAdminDashboard() {
       </div>
     `);
 
+    // Draw route vector line to next waypoint
     const pathCoords = [[truck.lat, truck.lng], [activeStop.lat, activeStop.lng]];
     if (!routePolylines[truck.id]) {
       routePolylines[truck.id] = L.polyline(pathCoords, { color: '#4AADE3', weight: 3, dashArray: '6, 6' }).addTo(map);
@@ -154,6 +147,7 @@ function renderAdminDashboard() {
       routePolylines[truck.id].setLatLngs(pathCoords);
     }
 
+    // Sidebar summary card
     const card = document.createElement('div');
     card.className = "p-4 rounded-xl border border-gcr-border bg-gcr-card hover:border-gcr transition cursor-pointer shadow-sm group";
     card.innerHTML = `
@@ -184,30 +178,31 @@ function renderAdminDashboard() {
   });
 }
 
-// Render Page 2: Route Management Table
+// ==================== PAGE 2: ROUTE MANAGER ====================
 function renderRoutesTable() {
   const container = document.getElementById('routes-table-container');
+  if (!container) return;
   container.innerHTML = '';
 
   fleetData.forEach(truck => {
     const section = document.createElement('div');
     section.className = "border border-gcr-border bg-gcr-card rounded-xl p-4";
-    
+
     let stopsHtml = truck.stops.map((s, idx) => `
-      <div class="flex items-center justify-between text-xs py-1.5 border-b border-gcr-border/40 last:border-0">
+      <div class="flex items-center justify-between text-xs py-2 border-b border-gcr-border/40 last:border-0">
         <div>
-          <span class="font-bold text-white">Stop ${idx + 1}:</span> ${s.name}
+          <span class="font-bold text-white">Stop ${idx + 1}:</span> <span class="text-slate-200">${s.name}</span>
         </div>
-        <span class="px-2 py-0.5 rounded text-[10px] ${s.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-300'}">
+        <span class="px-2.5 py-0.5 rounded text-[10px] font-semibold ${s.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-300'}">
           ${s.status}
         </span>
       </div>
     `).join('');
 
     section.innerHTML = `
-      <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center justify-between mb-3 border-b border-gcr-border/60 pb-2">
         <h4 class="font-bold text-sm text-gcr">${truck.id} (${truck.plate}) — ${truck.driver}</h4>
-        <span class="text-xs text-slate-400">${truck.stops.length} Assigned Stops</span>
+        <span class="text-xs text-slate-400">${truck.stops.length} Stops Total</span>
       </div>
       <div class="space-y-1">${stopsHtml}</div>
     `;
@@ -218,29 +213,30 @@ function renderRoutesTable() {
 window.addNewStopFromAdmin = function() {
   const select = document.getElementById('route-truck-select');
   const input = document.getElementById('route-stop-name');
-  if (!input.value.trim()) return alert('Please type a stop location name.');
+  if (!input.value.trim()) return alert('Please type a location name for the stop.');
 
   const truckId = select.value.split(' ')[0];
   const truck = fleetData.find(t => t.id === truckId);
   if (truck) {
     truck.stops.push({
       name: input.value.trim(),
-      lat: truck.lat + (Math.random() - 0.5) * 0.05,
-      lng: truck.lng + (Math.random() - 0.5) * 0.05,
+      lat: truck.lat + (Math.random() - 0.5) * 0.04,
+      lng: truck.lng + (Math.random() - 0.5) * 0.04,
       status: 'Pending'
     });
     input.value = '';
     renderRoutesTable();
     renderAdminDashboard();
-    alert('New stop successfully appended to route!');
+    alert('New stop added to ' + truckId);
   }
 };
 
-// Render Page 3: Driver Portal
+// ==================== PAGE 3: DRIVER TELEMETRY ====================
 const driverSelect = document.getElementById('driver-truck-select');
 const driverStopsContainer = document.getElementById('driver-stops-list');
 
 function renderDriverStops() {
+  if (!driverStopsContainer || !driverSelect) return;
   const selectedTruckId = driverSelect.value;
   const truck = fleetData.find(t => t.id === selectedTruckId);
   driverStopsContainer.innerHTML = '';
@@ -261,7 +257,7 @@ function renderDriverStops() {
       </div>
       <div>
         ${isCurrent ? `
-          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition">
+          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition cursor-pointer">
             Mark Delivered
           </button>
         ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Delivered</span>' : '<span class="text-xs text-slate-500">Pending</span>'}
@@ -271,7 +267,9 @@ function renderDriverStops() {
   });
 }
 
-driverSelect.addEventListener('change', renderDriverStops);
+if (driverSelect) {
+  driverSelect.addEventListener('change', renderDriverStops);
+}
 
 window.markStopCompleted = function(truckId, stopIndex) {
   const truck = fleetData.find(t => t.id === truckId);
@@ -284,9 +282,56 @@ window.markStopCompleted = function(truckId, stopIndex) {
   renderAdminDashboard();
 };
 
-// Page 4: Cold Chain Cards
+// Driver GPS Broadcasting Engine
+let watchId = null;
+const btnGps = document.getElementById('btn-toggle-gps');
+const gpsBadge = document.getElementById('gps-status-badge');
+const telemetry = document.getElementById('driver-telemetry');
+const coordsTxt = document.getElementById('telemetry-coords');
+const speedTxt = document.getElementById('telemetry-speed');
+
+if (btnGps) {
+  btnGps.addEventListener('click', () => {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
+      btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+      gpsBadge.innerText = 'GPS Offline';
+      telemetry.classList.add('hidden');
+    } else {
+      if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
+      gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+      gpsBadge.innerText = 'GPS Broadcasting Live';
+      btnGps.innerHTML = '<span>⏹️</span> Stop Sharing GPS';
+      btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      telemetry.classList.remove('hidden');
+
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+
+        coordsTxt.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        speedTxt.innerText = `${spd} km/h`;
+
+        const truck = fleetData.find(t => t.id === driverSelect.value);
+        if (truck) {
+          truck.lat = lat;
+          truck.lng = lng;
+          truck.speed = spd;
+          renderAdminDashboard();
+        }
+      }, (err) => console.error(err), { enableHighAccuracy: true });
+    }
+  });
+}
+
+// ==================== PAGE 4: COLD CHAIN CARDS ====================
 function renderColdChainCards() {
   const container = document.getElementById('coldchain-cards');
+  if (!container) return;
   container.innerHTML = '';
 
   fleetData.forEach(truck => {
@@ -298,57 +343,13 @@ function renderColdChainCards() {
         <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
       </div>
       <p class="text-xs text-slate-300">📦 Cargo: ${truck.cargo}</p>
-      <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5">
-        <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Reefer Compressor Normal
+      <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Reefer Compressor Active
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// Driver Live GPS Watcher
-let watchId = null;
-const btnGps = document.getElementById('btn-toggle-gps');
-const gpsBadge = document.getElementById('gps-status-badge');
-const telemetry = document.getElementById('driver-telemetry');
-const coordsTxt = document.getElementById('telemetry-coords');
-const speedTxt = document.getElementById('telemetry-speed');
-
-btnGps.addEventListener('click', () => {
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-    btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
-    btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2";
-    gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
-    gpsBadge.innerText = 'GPS Offline';
-    telemetry.classList.add('hidden');
-  } else {
-    if (!navigator.geolocation) return alert('Geolocation unsupported.');
-    gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-    gpsBadge.innerText = 'GPS Broadcasting Live';
-    btnGps.innerHTML = '<span>⏹️</span> Stop Sharing GPS';
-    btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2";
-    telemetry.classList.remove('hidden');
-
-    watchId = navigator.geolocation.watchPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
-
-      coordsTxt.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      speedTxt.innerText = `${spd} km/h`;
-
-      const truck = fleetData.find(t => t.id === driverSelect.value);
-      if (truck) {
-        truck.lat = lat;
-        truck.lng = lng;
-        truck.speed = spd;
-        renderAdminDashboard();
-      }
-    }, (err) => console.error(err), { enableHighAccuracy: true });
-  }
-});
-
-// Initial boot
+// Initialize boot view
 renderAdminDashboard();
