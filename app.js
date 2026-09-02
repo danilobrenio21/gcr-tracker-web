@@ -174,6 +174,7 @@ let fleetData = [
 const markers = {};
 let activeRoutingControl = null;
 let loggedInDriverTruckId = null;
+let isAdminAuthenticated = false;
 
 // Synchronize Manifest Vehicle Selection with Driver Name
 function initManifestDriverSync() {
@@ -270,10 +271,104 @@ window.navigatePage = function(pageId, pageTitle) {
     renderColdChainCards();
   } else if (pageId === 'page-driver-cockpit') {
     renderDriverCockpit();
+  } else if (pageId === 'page-admin-dashboard') {
+    renderAdminPortal();
   }
 
   if (typeof toggleDrawer === 'function') toggleDrawer(false);
 };
+
+// ==================== LOGISTICS ADMIN PORTAL ====================
+window.openAdminGate = function() {
+  if (isAdminAuthenticated) {
+    navigatePage('page-admin-dashboard', 'Logistics Admin Command');
+  } else {
+    navigatePage('page-admin-gate', 'Admin Authentication');
+  }
+};
+
+window.handleAdminAuth = function(e) {
+  e.preventDefault();
+  const inputPin = document.getElementById('admin-passcode-input').value.trim();
+  const errorBox = document.getElementById('admin-error-msg');
+
+  if (inputPin === '1234') {
+    errorBox.classList.add('hidden');
+    isAdminAuthenticated = true;
+    document.getElementById('admin-passcode-input').value = '';
+    document.getElementById('header-admin-label').innerText = 'Admin Active';
+    navigatePage('page-admin-dashboard', 'Logistics Admin Command');
+  } else {
+    errorBox.classList.remove('hidden');
+    errorBox.innerText = 'Access Denied: Invalid Dispatch Passcode.';
+  }
+};
+
+window.handleAdminSignOut = function() {
+  isAdminAuthenticated = false;
+  document.getElementById('header-admin-label').innerText = 'Admin Portal';
+  navigatePage('page-map', 'Fleet Monitoring & Map');
+};
+
+function renderAdminPortal() {
+  const tableBody = document.getElementById('admin-fleet-table');
+  if (!tableBody) return;
+  tableBody.innerHTML = '';
+
+  let totalPendingDrops = 0;
+
+  fleetData.forEach(truck => {
+    const activeStop = truck.stops[truck.currentStopIndex] || truck.stops[truck.stops.length - 1];
+    const completedCount = truck.stops.filter(s => s.status === 'Completed').length;
+    const remainingStops = truck.stops.length - completedCount;
+    totalPendingDrops += remainingStops;
+
+    const eta = calculateQuickETA(truck.lat, truck.lng, activeStop.lat, activeStop.lng, truck.speed);
+
+    const isTempAlert = truck.temp > -12 && truck.cargo.toLowerCase().includes('frozen');
+    const tempClass = isTempAlert ? 'text-rose-400 font-bold' : 'text-sky-300';
+
+    const row = document.createElement('tr');
+    row.className = "hover:bg-white/[0.04] transition cursor-pointer border-b border-white/[0.04]";
+    row.onclick = () => {
+      navigatePage('page-map', 'Live Fleet Overview');
+      setTimeout(() => {
+        map.flyTo([truck.lat, truck.lng], 14, { animate: true });
+        if (markers[truck.id]) markers[truck.id].openPopup();
+        drawInAppRoute(truck.lat, truck.lng, activeStop.lat, activeStop.lng, activeStop.name);
+      }, 300);
+    };
+
+    row.innerHTML = `
+      <td class="p-3 font-mono">
+        <span class="font-bold text-white block">${truck.id}</span>
+        <span class="text-[10px] text-slate-400">${truck.plate}</span>
+      </td>
+      <td class="p-3 text-slate-200">${truck.driver}</td>
+      <td class="p-3 text-slate-300 max-w-[180px] truncate" title="${truck.cargo}">${truck.cargo}</td>
+      <td class="p-3 font-mono ${tempClass}">${truck.temp}°C</td>
+      <td class="p-3 text-slate-200 max-w-[180px] truncate" title="${activeStop.name}">
+        <span class="block truncate">${activeStop.name}</span>
+        <span class="text-[10px] font-mono text-slate-400">${truck.speed} km/h</span>
+      </td>
+      <td class="p-3 font-mono text-emerald-400 font-semibold">
+        ~${eta.etaMinutes}m <span class="text-[10px] text-slate-400">(${eta.distanceKm}km)</span>
+      </td>
+      <td class="p-3 font-mono">
+        <span class="text-[10px] px-2 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-gcr">
+          ${completedCount}/${truck.stops.length} DROPS
+        </span>
+      </td>
+      <td class="p-3 text-right">
+        <span class="text-[10px] text-gcr font-semibold underline">Locate</span>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  const pendingCounter = document.getElementById('admin-pending-drops-count');
+  if (pendingCounter) pendingCounter.innerText = `${totalPendingDrops} Drops`;
+}
 
 // Driver Login
 window.handleDriverLogin = function(e) {
@@ -359,6 +454,7 @@ window.markStopCompleted = function(truckId, stopIndex) {
   }
   renderDriverCockpit();
   renderAdminDashboard();
+  if (isAdminAuthenticated) renderAdminPortal();
 };
 
 // Geolocation Broadcaster
@@ -409,6 +505,7 @@ if (btnGps) {
             drawInAppRoute(truck.lat, truck.lng, activeStop.lat, activeStop.lng, activeStop.name);
           }
           renderAdminDashboard();
+          if (isAdminAuthenticated) renderAdminPortal();
         }
       }, (err) => console.error(err), { enableHighAccuracy: true });
     }
@@ -546,6 +643,7 @@ function handleManifestSubmit(e) {
   }
 
   renderAdminDashboard();
+  if (isAdminAuthenticated) renderAdminPortal();
   alert(`Manifest logged for ${truckId}.`);
   navigatePage('page-map', 'Fleet Monitoring & Map');
 }
@@ -577,6 +675,6 @@ window.addEventListener('resize', () => {
   if (map) map.invalidateSize();
 });
 
-// Initial boot
+// Initial Boot
 initManifestDriverSync();
 renderAdminDashboard();
