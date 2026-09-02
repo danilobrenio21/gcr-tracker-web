@@ -257,8 +257,18 @@
       <form id="form-driver-login" onsubmit="handleDriverLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Your Assigned Unit</label>
-          <select id="login-truck-select" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
-            </select>
+          <select id="login-truck-select" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
+            <option value="REEFER-01">REEFER-01 (Plate: NDG-4421) — Danilo Brenio Sr.</option>
+            <option value="REEFER-02">REEFER-02 (Plate: CBC-8902) — Reynaldo Santos</option>
+            <option value="REEFER-03">REEFER-03 (Plate: TGC-1198) — Arnel Mendoza</option>
+            <option value="REEFER-04">REEFER-04 (Plate: NAL-5510) — Eduardo De Guzman</option>
+            <option value="REEFER-05">REEFER-05 (Plate: WAX-2041) — Marlon Bautista</option>
+            <option value="REEFER-06">REEFER-06 (Plate: NDO-7729) — Roberto Villanueva</option>
+            <option value="REEFER-07">REEFER-07 (Plate: CBA-3301) — Junar Delos Reyes</option>
+            <option value="REEFER-08">REEFER-08 (Plate: NDF-6184) — Joel Manansala</option>
+            <option value="REEFER-09">REEFER-09 (Plate: WBH-4890) — Christopher Ocampo</option>
+            <option value="REEFER-10">REEFER-10 (Plate: TGH-7734) — Ferdinand Soriano</option>
+          </select>
         </div>
 
         <div>
@@ -334,12 +344,22 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assign Reefer Unit</label>
-            <select id="man-truck-id" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
-              </select>
+            <select id="man-truck-id" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
+              <option value="REEFER-01">REEFER-01 (Plate: NDG-4421)</option>
+              <option value="REEFER-02">REEFER-02 (Plate: CBC-8902)</option>
+              <option value="REEFER-03">REEFER-03 (Plate: TGC-1198)</option>
+              <option value="REEFER-04">REEFER-04 (Plate: NAL-5510)</option>
+              <option value="REEFER-05">REEFER-05 (Plate: WAX-2041)</option>
+              <option value="REEFER-06">REEFER-06 (Plate: NDO-7729)</option>
+              <option value="REEFER-07">REEFER-07 (Plate: CBA-3301)</option>
+              <option value="REEFER-08">REEFER-08 (Plate: NDF-6184)</option>
+              <option value="REEFER-09">REEFER-09 (Plate: WBH-4890)</option>
+              <option value="REEFER-10">REEFER-10 (Plate: TGH-7734)</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Driver Assigned</label>
-            <input id="man-driver-name" type="text" readonly class="w-full bg-black/20 border border-gcr-border/40 rounded-xl px-3.5 py-2.5 text-xs text-slate-400 focus:outline-none">
+            <input id="man-driver-name" type="text" value="Danilo Brenio Sr." readonly class="w-full bg-black/20 border border-gcr-border/40 rounded-xl px-3.5 py-2.5 text-xs text-slate-400 focus:outline-none">
           </div>
         </div>
 
@@ -350,7 +370,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Target Temperature Setpoint</label>
-            <select id="man-temp" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
+            <select id="man-temp" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:ring-1 focus:ring-gcr focus:outline-none">
               <option value="-20.0">Deep Frozen (-20°C) — Fish Blocks, Pork, Beef</option>
               <option value="-15.0">Standard Frozen (-15°C) — Squid & Shrimps</option>
               <option value="2.0">Chilled (0°C to 4°C) — Live Tahong & Fresh Shells</option>
@@ -429,6 +449,6 @@
     }
   </script>
 
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=7.0"></script>
 </body>
 </html>
