@@ -1,92 +1,137 @@
-// Navotas Central Hub baseline
+// Navotas Base Hub
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Initialize Map
+// Leaflet Map Initialization
 const map = L.map('map').setView(NAVOTAS_CENTER, 12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-// Multi-drop fleet data
+// Fleet & Multi-Drop Data
 let fleetData = [
   {
     id: 'REEFER-01',
     plate: 'NDG-4421',
     driver: 'Danilo B.',
-    cargo: 'Frozen Bangus & Tilapia Blocks (1.8T)',
+    cargo: 'Frozen Bangus & Tilapia Blocks',
     temp: -19.2,
     lat: 14.6560,
     lng: 120.9520,
     speed: 34,
     currentStopIndex: 0,
     stops: [
-      { name: 'Balintawak Market Stall #14', lat: 14.6575, lng: 121.0025, status: 'In Transit', targetEtaMin: 12 },
-      { name: 'Munoz Wet Market Cold Bay', lat: 14.6580, lng: 121.0200, status: 'Pending', targetEtaMin: 28 },
-      { name: 'Commonwealth Seafood Depot', lat: 14.6900, lng: 121.0800, status: 'Pending', targetEtaMin: 45 }
+      { name: 'Balintawak Market Stall #14', lat: 14.6575, lng: 121.0025, status: 'In Transit' },
+      { name: 'Muñoz Wet Market Cold Bay', lat: 14.6580, lng: 121.0200, status: 'Pending' },
+      { name: 'Commonwealth Seafood Depot', lat: 14.6900, lng: 121.0800, status: 'Pending' }
     ]
   },
   {
     id: 'REEFER-02',
     plate: 'CBC-8902',
     driver: 'Reynaldo S.',
-    cargo: 'Imported Pork Belly & Beef (2.2T)',
+    cargo: 'Imported Pork Belly & Beef Cuts',
     temp: -18.4,
     lat: 14.6390,
     lng: 120.9850,
     speed: 26,
     currentStopIndex: 1,
     stops: [
-      { name: 'Divisoria Frozen Wholesale', lat: 14.6040, lng: 120.9720, status: 'Completed', targetEtaMin: 0 },
-      { name: 'Espana Commissary Bay 2', lat: 14.6120, lng: 120.9930, status: 'In Transit', targetEtaMin: 8 },
-      { name: 'Cubao Supermarket Central', lat: 14.6200, lng: 121.0520, status: 'Pending', targetEtaMin: 32 }
+      { name: 'Divisoria Frozen Wholesale', lat: 14.6040, lng: 120.9720, status: 'Completed' },
+      { name: 'España Commissary Bay 2', lat: 14.6120, lng: 120.9930, status: 'In Transit' },
+      { name: 'Cubao Supermarket Central', lat: 14.6200, lng: 121.0520, status: 'Pending' }
     ]
   },
   {
     id: 'REEFER-03',
     plate: 'TGC-1198',
     driver: 'Arnel M.',
-    cargo: 'Fresh Live Shellfish (Tahong/Talaba)',
+    cargo: 'Fresh Live Shells (Tahong & Talaba)',
     temp: 2.5,
     lat: 14.6545,
     lng: 120.9485,
     speed: 0,
     currentStopIndex: 0,
     stops: [
-      { name: 'Farmer\'s Market Cubao', lat: 14.6210, lng: 121.0530, status: 'Loading at Hub', targetEtaMin: 55 },
-      { name: 'Pasig Mega Market Stall 8', lat: 14.5580, lng: 121.0840, status: 'Pending', targetEtaMin: 80 }
+      { name: 'Farmer\'s Market Cubao', lat: 14.6210, lng: 121.0530, status: 'Loading at Hub' },
+      { name: 'Pasig Mega Market Stall 8', lat: 14.5580, lng: 121.0840, status: 'Pending' }
     ]
   }
 ];
 
 const markers = {};
 const routePolylines = {};
-const listContainer = document.getElementById('fleet-list');
 
-// Calculate straight-line rough distance & ETA
+// Drawer Toggle Logic
+const btnMenuOpen = document.getElementById('btn-menu-open');
+const btnMenuClose = document.getElementById('btn-menu-close');
+const navDrawer = document.getElementById('nav-drawer');
+const drawerBackdrop = document.getElementById('drawer-backdrop');
+
+function openDrawer() {
+  navDrawer.classList.remove('-translate-x-full');
+  drawerBackdrop.classList.remove('hidden');
+}
+
+function closeDrawer() {
+  navDrawer.classList.add('-translate-x-full');
+  drawerBackdrop.classList.add('hidden');
+}
+
+btnMenuOpen.addEventListener('click', openDrawer);
+btnMenuClose.addEventListener('click', closeDrawer);
+drawerBackdrop.addEventListener('click', closeDrawer);
+
+// Multi-Page Router Function
+window.navigatePage = function(pageId, pageTitle) {
+  // Hide all pages
+  document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+
+  // Show selected page
+  const targetPage = document.getElementById(pageId);
+  if (targetPage) targetPage.classList.remove('hidden');
+
+  // Update header title
+  document.getElementById('page-subtitle').innerText = pageTitle;
+
+  // Refresh map tiles if navigating back to map
+  if (pageId === 'page-map') {
+    setTimeout(() => map.invalidateSize(), 150);
+  } else if (pageId === 'page-routes') {
+    renderRoutesTable();
+  } else if (pageId === 'page-driver') {
+    renderDriverStops();
+  } else if (pageId === 'page-coldchain') {
+    renderColdChainCards();
+  }
+
+  closeDrawer();
+};
+
+// Distance & ETA Calculator
 function calculateETA(lat1, lon1, lat2, lon2, speedKmH) {
-  const R = 6371; // km
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const effectiveSpeed = speedKmH > 10 ? speedKmH : 25; // fallback average city speed
+  const effectiveSpeed = speedKmH > 10 ? speedKmH : 25;
   const minutes = Math.round((d / effectiveSpeed) * 60);
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// Render Admin View
+// Render Page 1: Admin Map & Sidebar
 function renderAdminDashboard() {
+  const listContainer = document.getElementById('fleet-list');
   listContainer.innerHTML = '';
 
   fleetData.forEach((truck) => {
     const activeStop = truck.stops[truck.currentStopIndex] || truck.stops[truck.stops.length - 1];
-    const completedStops = truck.stops.filter(s => s.status === 'Completed').length;
-    const etaInfo = calculateETA(truck.lat, truck.lng, activeStop.lat, activeStop.lng, truck.speed);
+    const completedCount = truck.stops.filter(s => s.status === 'Completed').length;
+    const eta = calculateETA(truck.lat, truck.lng, activeStop.lat, activeStop.lng, truck.speed);
 
-    // Update or create Map Marker
     if (!markers[truck.id]) {
       markers[truck.id] = L.marker([truck.lat, truck.lng]).addTo(map);
     } else {
@@ -94,16 +139,14 @@ function renderAdminDashboard() {
     }
 
     markers[truck.id].bindPopup(`
-      <div style="min-width: 190px;">
+      <div style="min-width: 180px;">
         <div style="font-weight:bold; color:#4AADE3;">${truck.id} (${truck.plate})</div>
         <div style="font-size:12px; margin-top:3px; color:#e2e8f0;"><b>Driver:</b> ${truck.driver}</div>
-        <div style="font-size:12px; color:#e2e8f0;"><b>Next Drop:</b> ${activeStop.name}</div>
-        <div style="font-size:12px; color:#38bdf8;"><b>ETA:</b> ~${etaInfo.etaMinutes} mins (${etaInfo.distanceKm} km)</div>
-        <div style="font-size:11px; color:#94a3b8; margin-top:4px;"><b>Cargo Temp:</b> ${truck.temp}°C</div>
+        <div style="font-size:12px; color:#e2e8f0;"><b>Next:</b> ${activeStop.name}</div>
+        <div style="font-size:12px; color:#38bdf8;"><b>ETA:</b> ~${eta.etaMinutes} mins (${eta.distanceKm} km)</div>
       </div>
     `);
 
-    // Draw route line to next stop
     const pathCoords = [[truck.lat, truck.lng], [activeStop.lat, activeStop.lng]];
     if (!routePolylines[truck.id]) {
       routePolylines[truck.id] = L.polyline(pathCoords, { color: '#4AADE3', weight: 3, dashArray: '6, 6' }).addTo(map);
@@ -111,25 +154,23 @@ function renderAdminDashboard() {
       routePolylines[truck.id].setLatLngs(pathCoords);
     }
 
-    // Sidebar Card
     const card = document.createElement('div');
     card.className = "p-4 rounded-xl border border-gcr-border bg-gcr-card hover:border-gcr transition cursor-pointer shadow-sm group";
     card.innerHTML = `
       <div class="flex items-center justify-between mb-2">
-        <span class="font-bold text-base text-white group-hover:text-gcr transition">${truck.id}</span>
-        <span class="text-xs px-2.5 py-0.5 rounded-full font-medium bg-sky-500/10 text-gcr border border-gcr/30">
-          ${completedStops}/${truck.stops.length} Delivered
+        <span class="font-bold text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-sky-500/10 text-gcr border border-gcr/30">
+          ${completedCount}/${truck.stops.length} Delivered
         </span>
       </div>
-
-      <div class="text-xs text-slate-300 space-y-1.5">
+      <div class="text-xs text-slate-300 space-y-1">
         <p class="text-[11px] text-slate-400 truncate">📦 ${truck.cargo}</p>
         <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white">${truck.driver}</span></p>
-        <p class="flex justify-between"><span class="text-slate-400">Cargo Temp:</span> <span class="text-sky-300 font-medium">${truck.temp}°C</span></p>
+        <p class="flex justify-between"><span class="text-slate-400">Temp:</span> <span class="text-sky-300 font-semibold">${truck.temp}°C</span></p>
         <div class="mt-2 pt-2 border-t border-gcr-border/60">
-          <p class="text-[11px] text-slate-400 font-semibold">📍 NEXT STOP:</p>
+          <p class="text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop:</p>
           <p class="text-white font-medium truncate">${activeStop.name}</p>
-          <p class="text-emerald-400 font-semibold mt-0.5">ETA: ~${etaInfo.etaMinutes} mins (${etaInfo.distanceKm} km away)</p>
+          <p class="text-emerald-400 font-semibold mt-0.5">ETA: ~${eta.etaMinutes} mins (${eta.distanceKm} km)</p>
         </div>
       </div>
     `;
@@ -143,29 +184,59 @@ function renderAdminDashboard() {
   });
 }
 
-// Mode Toggle Handling
-const tabAdmin = document.getElementById('tab-admin');
-const tabDriver = document.getElementById('tab-driver');
-const viewAdmin = document.getElementById('view-admin');
-const viewDriver = document.getElementById('view-driver');
+// Render Page 2: Route Management Table
+function renderRoutesTable() {
+  const container = document.getElementById('routes-table-container');
+  container.innerHTML = '';
 
-tabAdmin.addEventListener('click', () => {
-  tabAdmin.className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-gcr text-white shadow-sm transition";
-  tabDriver.className = "px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-  viewAdmin.classList.remove('hidden');
-  viewDriver.classList.add('hidden');
-  map.invalidateSize();
-});
+  fleetData.forEach(truck => {
+    const section = document.createElement('div');
+    section.className = "border border-gcr-border bg-gcr-card rounded-xl p-4";
+    
+    let stopsHtml = truck.stops.map((s, idx) => `
+      <div class="flex items-center justify-between text-xs py-1.5 border-b border-gcr-border/40 last:border-0">
+        <div>
+          <span class="font-bold text-white">Stop ${idx + 1}:</span> ${s.name}
+        </div>
+        <span class="px-2 py-0.5 rounded text-[10px] ${s.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-300'}">
+          ${s.status}
+        </span>
+      </div>
+    `).join('');
 
-tabDriver.addEventListener('click', () => {
-  tabDriver.className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-gcr text-white shadow-sm transition";
-  tabAdmin.className = "px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition";
-  viewAdmin.classList.add('hidden');
-  viewDriver.classList.remove('hidden');
-  renderDriverStops();
-});
+    section.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="font-bold text-sm text-gcr">${truck.id} (${truck.plate}) — ${truck.driver}</h4>
+        <span class="text-xs text-slate-400">${truck.stops.length} Assigned Stops</span>
+      </div>
+      <div class="space-y-1">${stopsHtml}</div>
+    `;
+    container.appendChild(section);
+  });
+}
 
-// Driver View: Render Stops for Selected Truck
+window.addNewStopFromAdmin = function() {
+  const select = document.getElementById('route-truck-select');
+  const input = document.getElementById('route-stop-name');
+  if (!input.value.trim()) return alert('Please type a stop location name.');
+
+  const truckId = select.value.split(' ')[0];
+  const truck = fleetData.find(t => t.id === truckId);
+  if (truck) {
+    truck.stops.push({
+      name: input.value.trim(),
+      lat: truck.lat + (Math.random() - 0.5) * 0.05,
+      lng: truck.lng + (Math.random() - 0.5) * 0.05,
+      status: 'Pending'
+    });
+    input.value = '';
+    renderRoutesTable();
+    renderAdminDashboard();
+    alert('New stop successfully appended to route!');
+  }
+};
+
+// Render Page 3: Driver Portal
 const driverSelect = document.getElementById('driver-truck-select');
 const driverStopsContainer = document.getElementById('driver-stops-list');
 
@@ -178,14 +249,13 @@ function renderDriverStops() {
     const isCurrent = index === truck.currentStopIndex;
     const isDone = stop.status === 'Completed';
 
-    const stopCard = document.createElement('div');
-    stopCard.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/10' : 'border-gcr-border bg-gcr-card'} flex items-center justify-between gap-3`;
-    
-    stopCard.innerHTML = `
+    const card = document.createElement('div');
+    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/10' : 'border-gcr-border bg-gcr-card'} flex items-center justify-between gap-3`;
+    card.innerHTML = `
       <div>
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'}">Stop ${index + 1}: ${stop.name}</span>
-          ${isCurrent ? '<span class="text-[10px] bg-gcr text-white font-bold px-1.5 py-0.2 rounded">NEXT</span>' : ''}
+          ${isCurrent ? '<span class="text-[9px] bg-gcr text-white font-bold px-1.5 py-0.2 rounded">NEXT</span>' : ''}
         </div>
         <p class="text-[11px] text-slate-400 mt-0.5">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
       </div>
@@ -194,16 +264,15 @@ function renderDriverStops() {
           <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition">
             Mark Delivered
           </button>
-        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Done</span>' : '<span class="text-xs text-slate-500">Upcoming</span>'}
+        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Delivered</span>' : '<span class="text-xs text-slate-500">Pending</span>'}
       </div>
     `;
-    driverStopsContainer.appendChild(stopCard);
+    driverStopsContainer.appendChild(card);
   });
 }
 
 driverSelect.addEventListener('change', renderDriverStops);
 
-// Mark Stop Delivered function
 window.markStopCompleted = function(truckId, stopIndex) {
   const truck = fleetData.find(t => t.id === truckId);
   truck.stops[stopIndex].status = 'Completed';
@@ -215,59 +284,71 @@ window.markStopCompleted = function(truckId, stopIndex) {
   renderAdminDashboard();
 };
 
-// Driver GPS Broadcasting
+// Page 4: Cold Chain Cards
+function renderColdChainCards() {
+  const container = document.getElementById('coldchain-cards');
+  container.innerHTML = '';
+
+  fleetData.forEach(truck => {
+    const card = document.createElement('div');
+    card.className = "bg-gcr-card border border-gcr-border p-4 rounded-xl space-y-2";
+    card.innerHTML = `
+      <div class="flex justify-between items-center">
+        <span class="font-bold text-sm text-white">${truck.id}</span>
+        <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
+      </div>
+      <p class="text-xs text-slate-300">📦 Cargo: ${truck.cargo}</p>
+      <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5">
+        <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Reefer Compressor Normal
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Driver Live GPS Watcher
 let watchId = null;
 const btnGps = document.getElementById('btn-toggle-gps');
-const gpsStatusBadge = document.getElementById('gps-status-badge');
-const telemetryBox = document.getElementById('driver-telemetry');
-const coordsText = document.getElementById('telemetry-coords');
-const speedText = document.getElementById('telemetry-speed');
+const gpsBadge = document.getElementById('gps-status-badge');
+const telemetry = document.getElementById('driver-telemetry');
+const coordsTxt = document.getElementById('telemetry-coords');
+const speedTxt = document.getElementById('telemetry-speed');
 
 btnGps.addEventListener('click', () => {
   if (watchId !== null) {
     navigator.geolocation.clearWatch(watchId);
     watchId = null;
     btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
-    btnGps.className = "w-full py-3 rounded-xl font-bold text-sm bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2";
-    gpsStatusBadge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
-    gpsStatusBadge.innerText = 'GPS Offline';
-    telemetryBox.classList.add('hidden');
+    btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2";
+    gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+    gpsBadge.innerText = 'GPS Offline';
+    telemetry.classList.add('hidden');
   } else {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
-      return;
-    }
-
-    gpsStatusBadge.className = "px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-    gpsStatusBadge.innerText = 'GPS Live Broadcasting';
+    if (!navigator.geolocation) return alert('Geolocation unsupported.');
+    gpsBadge.className = "px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+    gpsBadge.innerText = 'GPS Broadcasting Live';
     btnGps.innerHTML = '<span>⏹️</span> Stop Sharing GPS';
-    btnGps.className = "w-full py-3 rounded-xl font-bold text-sm bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2";
-    telemetryBox.classList.remove('hidden');
+    btnGps.className = "w-full py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2";
+    telemetry.classList.remove('hidden');
 
-    watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+    watchId = navigator.geolocation.watchPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
 
-        coordsText.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        speedText.innerText = `${spd} km/h`;
+      coordsTxt.innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      speedTxt.innerText = `${spd} km/h`;
 
-        // Update selected truck coordinates in memory
-        const selectedTruckId = driverSelect.value;
-        const truck = fleetData.find(t => t.id === selectedTruckId);
-        if (truck) {
-          truck.lat = lat;
-          truck.lng = lng;
-          truck.speed = spd;
-          renderAdminDashboard();
-        }
-      },
-      (err) => console.error(err),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-    );
+      const truck = fleetData.find(t => t.id === driverSelect.value);
+      if (truck) {
+        truck.lat = lat;
+        truck.lng = lng;
+        truck.speed = spd;
+        renderAdminDashboard();
+      }
+    }, (err) => console.error(err), { enableHighAccuracy: true });
   }
 });
 
-// Initial run
+// Initial boot
 renderAdminDashboard();
