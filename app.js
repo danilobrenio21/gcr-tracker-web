@@ -1,17 +1,21 @@
 // Navotas Central Hub Base Coordinates
 const NAVOTAS_CENTER = [14.6545, 120.9485];
 
-// Initialize Leaflet Map
-const map = L.map('map', { zoomControl: false }).setView(NAVOTAS_CENTER, 12);
+// Initialize Leaflet Map with responsive options
+const map = L.map('map', { 
+  zoomControl: false,
+  tap: false // prevents iOS Safari double-tap delay
+}).setView(NAVOTAS_CENTER, 12);
+
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// Carto Voyager Map Tiles
+// Carto Voyager Clean Navigation Tiles
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-// 10-Truck Operational Fleet with 8-digit Login Passcodes (Last 4 digits of phone + 4-digit birth year)
+// 10-Truck Fleet State
 let fleetData = [
   {
     id: 'REEFER-01',
@@ -191,7 +195,7 @@ const markers = {};
 let activeRoutingControl = null;
 let loggedInDriverTruckId = null;
 
-// Hook up manifest vehicle changes to update driver name display
+// Synchronize manifest select with driver name
 function initManifestDriverSync() {
   const manSelect = document.getElementById('man-truck-id');
   const manDriver = document.getElementById('man-driver-name');
@@ -203,7 +207,7 @@ function initManifestDriverSync() {
   }
 }
 
-// In-App Routing Engine
+// In-App Turn-by-Turn Routing Engine
 function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
   if (activeRoutingControl) {
     map.removeControl(activeRoutingControl);
@@ -220,14 +224,14 @@ function drawInAppRoute(fromLat, fromLng, toLat, toLng, destinationName) {
     collapsible: true,
     lineOptions: {
       styles: [
-        { color: '#0369a1', opacity: 0.8, weight: 8 },
-        { color: '#38bdf8', opacity: 1, weight: 5 }
+        { color: '#0369a1', opacity: 0.8, weight: 6 },
+        { color: '#38bdf8', opacity: 1, weight: 4 }
       ]
     },
     createMarker: function(i, wp) {
       const isStart = i === 0;
       return L.marker(wp.latLng).bindPopup(
-        `<div style="font-family:inherit;font-size:12px;"><b>${isStart ? 'Current Location' : 'Destination'}:</b> ${isStart ? 'Truck Position' : destinationName}</div>`
+        `<div style="font-family:inherit;font-size:11px;"><b>${isStart ? 'Origin' : 'Destination'}:</b> ${isStart ? 'Truck Position' : destinationName}</div>`
       );
     }
   }).addTo(map);
@@ -241,7 +245,7 @@ async function executeMapSearch() {
   if (!query) return;
 
   resultsBox.classList.remove('hidden');
-  resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">Searching road locations in the Philippines...</div>`;
+  resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">Searching road locations in the Philippines...</div>`;
 
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Philippines')}&limit=5`);
@@ -249,7 +253,7 @@ async function executeMapSearch() {
 
     resultsBox.innerHTML = '';
     if (data.length === 0) {
-      resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-400">No destinations found. Try adding city name (e.g. 'Balintawak, Quezon City').</div>`;
+      resultsBox.innerHTML = `<div class="p-2.5 text-xs text-slate-400">No destinations found. Try adding a city name.</div>`;
       return;
     }
 
@@ -269,7 +273,7 @@ async function executeMapSearch() {
       resultsBox.appendChild(div);
     });
   } catch (err) {
-    resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Search error. Please try again.</div>`;
+    resultsBox.innerHTML = `<div class="p-2.5 text-xs text-rose-400">Search error. Please try again.</div>`;
   }
 }
 
@@ -283,7 +287,7 @@ window.navigatePage = function(pageId, pageTitle) {
   document.getElementById('page-subtitle').innerText = pageTitle;
 
   if (pageId === 'page-map') {
-    setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => map.invalidateSize(), 250);
     renderAdminDashboard();
   } else if (pageId === 'page-coldchain') {
     renderColdChainCards();
@@ -321,7 +325,7 @@ window.handleDriverLogin = function(e) {
 
 window.handleDriverLogout = function() {
   loggedInDriverTruckId = null;
-  document.getElementById('header-auth-label').innerText = 'Driver Login';
+  document.getElementById('header-auth-label').innerText = 'Login';
   document.getElementById('header-auth-btn').onclick = () => navigatePage('page-driver-login', 'Driver Authentication Portal');
   document.getElementById('login-passcode').value = '';
   navigatePage('page-driver-login', 'Driver Authentication Portal');
@@ -347,21 +351,21 @@ function renderDriverCockpit() {
     const isDone = stop.status === 'Completed';
 
     const card = document.createElement('div');
-    card.className = `p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/15' : 'border-gcr-border/40 bg-black/20'} flex items-center justify-between gap-3`;
+    card.className = `p-3.5 sm:p-4 rounded-xl border ${isCurrent ? 'border-gcr bg-gcr/15' : 'border-gcr-border/40 bg-black/25'} flex items-center justify-between gap-2.5`;
     card.innerHTML = `
-      <div>
+      <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'}">Drop ${index + 1}: ${stop.name}</span>
-          ${isCurrent ? '<span class="text-[9px] bg-gcr text-white font-bold px-2 py-0.5 rounded-full">ACTIVE DROP</span>' : ''}
+          <span class="text-xs font-bold ${isDone ? 'text-slate-500 line-through' : 'text-white'} truncate">Drop ${index + 1}: ${stop.name}</span>
+          ${isCurrent ? '<span class="text-[8px] sm:text-[9px] bg-gcr text-white font-bold px-1.5 py-0.5 rounded-full shrink-0">ACTIVE</span>' : ''}
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
+        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Status: <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-slate-300'}">${stop.status}</span></p>
       </div>
-      <div>
+      <div class="shrink-0">
         ${isCurrent ? `
-          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer">
-            Mark Delivered
+          <button onclick="markStopCompleted('${truck.id}', ${index})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow transition cursor-pointer active:scale-95">
+            Delivered
           </button>
-        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Delivered</span>' : '<span class="text-xs text-slate-500">Upcoming</span>'}
+        ` : isDone ? '<span class="text-xs text-emerald-400 font-bold">✓ Done</span>' : '<span class="text-xs text-slate-500">Pending</span>'}
       </div>
     `;
     container.appendChild(card);
@@ -394,17 +398,17 @@ if (btnGps) {
     if (watchId !== null) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
-      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS Coordinates';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
-      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+      btnGps.innerHTML = '<span>📡</span> Start Sharing Live GPS';
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-98";
+      gpsBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700";
       gpsBadge.innerText = 'GPS Offline';
       telemetry.classList.add('hidden');
     } else {
       if (!navigator.geolocation) return alert('Geolocation is not supported by your browser.');
-      gpsBadge.className = "px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+      gpsBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
       gpsBadge.innerText = 'GPS Live Broadcasting';
       btnGps.innerHTML = '<span>⏹️</span> Stop Broadcasting Location';
-      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+      btnGps.className = "w-full py-3.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer active:scale-98";
       telemetry.classList.remove('hidden');
 
       watchId = navigator.geolocation.watchPosition((pos) => {
@@ -431,7 +435,7 @@ if (btnGps) {
   });
 }
 
-// Distance & ETA Helper
+// Distance Calculation Helper
 function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -445,7 +449,7 @@ function calculateQuickETA(lat1, lon1, lat2, lon2, speedKmH) {
   return { distanceKm: d.toFixed(1), etaMinutes: minutes };
 }
 
-// Admin Dashboard Rendering
+// Render Admin Dashboard
 function renderAdminDashboard() {
   const listContainer = document.getElementById('fleet-list');
   if (!listContainer) return;
@@ -463,12 +467,11 @@ function renderAdminDashboard() {
     }
 
     markers[truck.id].bindPopup(`
-      <div style="min-width: 190px;">
+      <div style="min-width: 170px;">
         <div style="font-weight:bold; color:#4AADE3;">${truck.id} (${truck.plate})</div>
-        <div style="font-size:12px; margin-top:3px; color:#e2e8f0;"><b>Driver:</b> ${truck.driver}</div>
-        <div style="font-size:12px; color:#e2e8f0;"><b>Next Drop:</b> ${activeStop.name}</div>
-        <div style="font-size:12px; color:#38bdf8;"><b>Approx:</b> ~${eta.etaMinutes} mins (${eta.distanceKm} km)</div>
-        <div style="font-size:11px; color:#94a3b8; margin-top:3px;">📦 ${truck.cargo}</div>
+        <div style="font-size:11px; margin-top:2px; color:#e2e8f0;"><b>Driver:</b> ${truck.driver}</div>
+        <div style="font-size:11px; color:#e2e8f0;"><b>Next Drop:</b> ${activeStop.name}</div>
+        <div style="font-size:11px; color:#38bdf8;"><b>Approx:</b> ~${eta.etaMinutes} mins (${eta.distanceKm} km)</div>
       </div>
     `);
 
@@ -477,23 +480,23 @@ function renderAdminDashboard() {
     }
 
     const card = document.createElement('div');
-    card.className = "p-4 rounded-2xl glass-panel hover:border-gcr/60 transition duration-200 cursor-pointer shadow-lg group hover:scale-[1.01]";
+    card.className = "p-3 sm:p-4 rounded-xl sm:rounded-2xl glass-panel hover:border-gcr/60 transition duration-200 cursor-pointer shadow-md group";
     card.innerHTML = `
-      <div class="flex items-center justify-between mb-2">
-        <span class="font-display font-bold text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
-        <span class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-sky-500/15 text-gcr border border-gcr/30">
-          ${completedCount}/${truck.stops.length} Drops Done
+      <div class="flex items-center justify-between mb-1 sm:mb-2">
+        <span class="font-display font-bold text-xs sm:text-sm text-white group-hover:text-gcr transition">${truck.id}</span>
+        <span class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-semibold bg-sky-500/15 text-gcr border border-gcr/30">
+          ${completedCount}/${truck.stops.length} Drops
         </span>
       </div>
-      <div class="text-xs text-slate-300 space-y-1.5">
-        <p class="text-[11px] text-slate-400 truncate">📦 ${truck.cargo}</p>
-        <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white font-medium">${truck.driver}</span></p>
+      <div class="text-[11px] sm:text-xs text-slate-300 space-y-1">
+        <p class="text-slate-400 truncate text-[10px] sm:text-[11px]">📦 ${truck.cargo}</p>
+        <p class="flex justify-between"><span class="text-slate-400">Driver:</span> <span class="text-white font-medium truncate max-w-[130px]">${truck.driver}</span></p>
         <p class="flex justify-between"><span class="text-slate-400">Box Temp:</span> <span class="text-sky-300 font-bold font-mono">${truck.temp}°C</span></p>
-        <div class="mt-2.5 pt-2 border-t border-gcr-border/30">
-          <p class="text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop-off:</p>
+        <div class="mt-1.5 pt-1.5 border-t border-gcr-border/30">
+          <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">📍 Next Drop:</p>
           <p class="text-white font-medium truncate">${activeStop.name}</p>
-          <p class="text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> ETA: ~${eta.etaMinutes} mins (${eta.distanceKm} km away)
+          <p class="text-emerald-400 font-semibold mt-0.5 text-[10px] sm:text-[11px]">
+            ETA: ~${eta.etaMinutes} mins (${eta.distanceKm} km)
           </p>
         </div>
       </div>
@@ -509,18 +512,18 @@ function renderAdminDashboard() {
   });
 }
 
-// Manifest Controls
+// Manifest Drop-Off Rows
 let stopRowCount = 2;
 
 window.addStopInputRow = function() {
   stopRowCount++;
   const container = document.getElementById('stops-input-container');
   const row = document.createElement('div');
-  row.className = "flex items-center gap-2.5 stop-row";
+  row.className = "flex items-center gap-2 stop-row";
   row.innerHTML = `
-    <span class="text-xs text-gcr font-bold w-16">Stop ${stopRowCount}:</span>
-    <input type="text" required placeholder="Enter destination drop location..." class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
-    <button type="button" onclick="removeStopRow(this)" class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
+    <span class="text-[11px] sm:text-xs text-gcr font-bold w-14 shrink-0">Stop ${stopRowCount}:</span>
+    <input type="text" required placeholder="Enter drop location..." class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
+    <button type="button" onclick="removeStopRow(this)" class="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
   `;
   container.appendChild(row);
 };
@@ -577,21 +580,26 @@ function renderColdChainCards() {
 
   fleetData.forEach(truck => {
     const card = document.createElement('div');
-    card.className = "glass-panel p-4 rounded-xl space-y-2 border border-gcr-border/40 shadow-lg";
+    card.className = "glass-panel p-3.5 sm:p-4 rounded-xl space-y-1.5 sm:space-y-2 border border-gcr-border/40 shadow-lg";
     card.innerHTML = `
       <div class="flex justify-between items-center">
-        <span class="font-display font-bold text-sm text-white">${truck.id} (${truck.plate})</span>
+        <span class="font-display font-bold text-xs sm:text-sm text-white">${truck.id} (${truck.plate})</span>
         <span class="text-xs font-mono font-bold text-gcr">${truck.temp}°C</span>
       </div>
       <p class="text-xs text-slate-300">Driver: <span class="text-white">${truck.driver}</span></p>
-      <p class="text-xs text-slate-400 truncate">📦 ${truck.cargo}</p>
-      <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
+      <p class="text-[11px] sm:text-xs text-slate-400 truncate">📦 ${truck.cargo}</p>
+      <div class="text-[10px] sm:text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
         <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Compressor Normal
       </div>
     `;
     container.appendChild(card);
   });
 }
+
+// Window resize handler to ensure map tiles adapt dynamically between portrait and landscape
+window.addEventListener('resize', () => {
+  if (map) map.invalidateSize();
+});
 
 // Initial Boot
 initManifestDriverSync();
