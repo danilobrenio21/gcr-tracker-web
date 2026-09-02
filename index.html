@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>GCR Food Products Trading — Fleet Operations Portal</title>
+  <title>GCR Food Products Trading — Fleet Telematics</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -15,7 +15,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -23,19 +23,16 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            display: ['Outfit', 'sans-serif']
+            display: ['"Space Grotesk"', 'sans-serif']
           },
           colors: {
             gcr: {
               DEFAULT: '#4AADE3',
-              glow: '#38bdf8',
-              dark: '#1e8bc3',
-              light: '#EBF6FC',
-              bg: '#070D14',
-              surface: 'rgba(15, 25, 38, 0.85)',
-              card: 'rgba(21, 35, 52, 0.75)',
-              cardHover: 'rgba(28, 46, 68, 0.95)',
-              border: 'rgba(74, 173, 227, 0.25)'
+              dark: '#258ec7',
+              muted: '#1e384d',
+              surface: '#0d1520',
+              card: '#121d2b',
+              border: 'rgba(74, 173, 227, 0.18)'
             }
           }
         }
@@ -45,51 +42,39 @@
 
   <style>
     body {
-      background: radial-gradient(circle at 10% 10%, #0d1a29 0%, #060a10 100%);
+      background: #080d14;
       min-height: 100dvh;
     }
 
     #map {
       height: 100%;
       width: 100%;
-      border-radius: 1rem;
+      border-radius: 0.875rem;
       z-index: 10;
     }
 
-    .glass-panel {
-      background: rgba(15, 25, 38, 0.8);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(74, 173, 227, 0.25);
+    .ui-panel {
+      background: rgba(13, 21, 32, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    /* Scrollbars */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(74, 173, 227, 0.3); border-radius: 9999px; }
-
-    /* Responsive routing box */
+    /* Routing Turn Box Sleek Styling */
     .leaflet-routing-container {
-      background: rgba(13, 22, 33, 0.95) !important;
-      backdrop-filter: blur(12px) !important;
-      color: #e2e8f0 !important;
-      border: 1px solid rgba(74, 173, 227, 0.35) !important;
+      background: rgba(13, 21, 32, 0.94) !important;
+      backdrop-filter: blur(14px) !important;
+      color: #cbd5e1 !important;
+      border: 1px solid rgba(74, 173, 227, 0.25) !important;
       border-radius: 0.75rem !important;
-      font-size: 10px !important;
-      max-height: 160px;
-      max-width: 260px;
-      overflow-y: auto;
+      font-size: 11px !important;
+      max-height: 180px;
+      max-width: 280px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5) !important;
       z-index: 990 !important;
     }
-    @media (min-width: 768px) {
-      .leaflet-routing-container {
-        font-size: 11px !important;
-        max-height: 220px;
-        max-width: 320px;
-      }
-    }
-    .leaflet-routing-alt { border-color: rgba(74, 173, 227, 0.2) !important; }
-    .leaflet-routing-alt tr:hover { background: rgba(74, 173, 227, 0.15) !important; }
+    .leaflet-routing-alt { border-color: rgba(255, 255, 255, 0.08) !important; }
+    .leaflet-routing-alt tr:hover { background: rgba(74, 173, 227, 0.12) !important; }
 
     /* Nav Drawer */
     #nav-drawer {
@@ -97,263 +82,276 @@
       top: 0;
       bottom: 0;
       left: 0;
-      width: 85vw;
-      max-width: 310px;
+      width: 82vw;
+      max-width: 290px;
       transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 99999;
     }
     #nav-drawer.active { transform: translateX(0) !important; }
     #drawer-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(4, 8, 14, 0.8);
-      backdrop-filter: blur(6px);
+      background: rgba(3, 7, 13, 0.75);
+      backdrop-filter: blur(4px);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease;
       z-index: 99998;
     }
     #drawer-backdrop.active { opacity: 1 !important; pointer-events: auto !important; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(74, 173, 227, 0.2); border-radius: 9999px; }
   </style>
 </head>
-<body class="text-slate-100 flex flex-col font-sans selection:bg-gcr selection:text-white h-full overflow-x-hidden">
+<body class="text-slate-200 flex flex-col font-sans h-full overflow-x-hidden">
 
-  <header class="border-b border-gcr-border/40 glass-panel px-3 sm:px-4 md:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40 shadow-lg">
-    <div class="flex items-center gap-2.5 sm:gap-3.5">
+  <header class="border-b border-white/[0.08] ui-panel px-3 sm:px-5 py-2.5 flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center gap-3">
       <button 
         id="btn-menu-open" 
         onclick="toggleDrawer(true)" 
         type="button" 
-        class="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gcr-card hover:bg-gcr-cardHover border border-gcr-border text-white hover:border-gcr transition cursor-pointer flex items-center justify-center active:scale-95 shadow-md shadow-black/40"
+        class="h-9 w-9 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer"
       >
-        <svg class="w-5 h-5 pointer-events-none text-gcr" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
       </button>
 
       <div class="flex items-center gap-2.5">
-        <div class="h-9 sm:h-10 px-2 sm:px-2.5 py-1 bg-white/95 rounded-xl flex items-center justify-center shadow-lg border border-white/20 ring-1 ring-gcr/30 shrink-0">
-          <img src="logo.jpg" alt="GCR Logo" class="h-7 sm:h-8 w-auto object-contain" onerror="this.style.display='none'" />
+        <div class="h-8 px-2 py-0.5 bg-white rounded-lg flex items-center justify-center border border-white/20 shrink-0">
+          <img src="logo.jpg" alt="GCR Logo" class="h-6 w-auto object-contain" onerror="this.style.display='none'" />
         </div>
         <div>
-          <h1 class="font-display font-extrabold text-xs sm:text-sm md:text-base tracking-tight text-white flex items-center gap-1.5 leading-tight">
-            GCR Logistics <span class="hidden sm:inline-block text-[9px] px-1.5 py-0.5 rounded-full bg-gcr/20 border border-gcr/40 text-gcr font-semibold uppercase">10 Trucks</span>
+          <h1 class="font-display font-bold text-xs sm:text-sm tracking-tight text-white flex items-center gap-1.5 leading-none">
+            GCR Telematics
           </h1>
-          <p id="page-subtitle" class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate max-w-[150px] sm:max-w-none">Live Fleet Dispatch Map</p>
+          <p id="page-subtitle" class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate mt-0.5">Navotas Fleet Operations</p>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center gap-1.5 sm:gap-2.5">
-      <button id="header-auth-btn" onclick="navigatePage('page-driver-login', 'Driver Authentication Portal')" class="text-[11px] sm:text-xs bg-gcr/20 hover:bg-gcr/30 border border-gcr/40 px-2.5 sm:px-3 py-2 rounded-xl font-bold text-gcr transition active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap">
-        <span>🔐</span> <span id="header-auth-label">Login</span>
+    <div class="flex items-center gap-2">
+      <button id="header-auth-btn" onclick="navigatePage('page-driver-login', 'Driver Authentication')" class="text-xs bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-gcr" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0110 0v4" />
+        </svg>
+        <span id="header-auth-label">Driver Portal</span>
       </button>
-      <button onclick="navigatePage('page-operator', 'Operator Manifest Portal')" class="text-[11px] sm:text-xs bg-gradient-to-r from-sky-500 to-gcr hover:from-sky-400 hover:to-gcr-dark px-2.5 sm:px-3 py-2 rounded-xl font-bold text-white shadow-md shadow-sky-500/20 transition active:scale-95 flex items-center gap-1 cursor-pointer border border-sky-400/40 whitespace-nowrap">
-        <span>📝</span> <span class="hidden xs:inline">Create</span> Manifest
+
+      <button onclick="navigatePage('page-operator', 'Dispatch & Manifest')" class="text-xs bg-gcr hover:bg-gcr-dark px-3 py-1.5 rounded-lg font-semibold text-white shadow-sm shadow-gcr/30 transition flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>Manifest</span>
       </button>
     </div>
   </header>
 
   <div id="drawer-backdrop" onclick="toggleDrawer(false)"></div>
 
-  <aside id="nav-drawer" class="glass-panel border-r border-gcr-border flex flex-col justify-between shadow-2xl">
+  <aside id="nav-drawer" class="ui-panel border-r border-white/[0.08] flex flex-col justify-between shadow-2xl">
     <div>
-      <div class="p-4 border-b border-gcr-border/40 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="h-8 px-2 bg-white/95 rounded-lg flex items-center justify-center border border-white/20">
-            <img src="logo.jpg" alt="GCR Logo" class="h-6 w-auto object-contain" onerror="this.style.display='none'" />
-          </div>
-          <span class="font-display font-bold text-sm text-white">System Menu</span>
-        </div>
-        <button onclick="toggleDrawer(false)" type="button" class="h-9 w-9 rounded-lg text-slate-400 hover:text-white hover:bg-gcr-card flex items-center justify-center transition cursor-pointer">
-          <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      <div class="p-4 border-b border-white/[0.08] flex items-center justify-between">
+        <span class="font-display font-bold text-xs uppercase tracking-wider text-slate-400">Navigation</span>
+        <button onclick="toggleDrawer(false)" type="button" class="h-8 w-8 rounded-lg text-slate-400 hover:text-white flex items-center justify-center cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <nav class="p-3 space-y-1.5 font-medium text-xs sm:text-sm">
-        <button onclick="navigatePage('page-map', 'Live Fleet & Road Search Map')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-white bg-gcr/25 border border-gcr/40 hover:bg-gcr transition text-left cursor-pointer shadow-sm">
-          <span class="text-base">🗺️</span>
-          <span>Live Fleet Map (10 Trucks)</span>
+      <nav class="p-2.5 space-y-1 text-xs">
+        <button onclick="navigatePage('page-map', 'Fleet Monitoring & Map')" type="button" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-white bg-gcr/20 border border-gcr/40 font-medium transition text-left cursor-pointer">
+          <svg class="w-4 h-4 text-gcr" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+          <span>Fleet Overview (10 Units)</span>
         </button>
 
-        <button onclick="navigatePage('page-driver-login', 'Driver Authentication Portal')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-gcr border border-gcr/40 bg-gcr/10 hover:bg-gcr hover:text-white transition text-left cursor-pointer">
-          <span class="text-base">🔐</span>
-          <span>Driver Dedicated Login</span>
+        <button onclick="navigatePage('page-driver-login', 'Driver Authentication')" type="button" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-white/[0.04] hover:text-white font-medium transition text-left cursor-pointer">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+          <span>Driver Cockpit</span>
         </button>
 
-        <button onclick="navigatePage('page-operator', 'Operator Manifest & Load Entry')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
-          <span class="text-base">📋</span>
-          <span>Dispatch & Cargo Manifest</span>
+        <button onclick="navigatePage('page-operator', 'Dispatch & Manifest')" type="button" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-white/[0.04] hover:text-white font-medium transition text-left cursor-pointer">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          <span>Trip Manifest Entry</span>
         </button>
 
-        <button onclick="navigatePage('page-coldchain', 'Reefer Temp Compliance')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
-          <span class="text-base">❄️</span>
-          <span>10-Truck Cold Chain Logs</span>
+        <button onclick="navigatePage('page-coldchain', 'Cold Chain Compliance')" type="button" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-white/[0.04] hover:text-white font-medium transition text-left cursor-pointer">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <span>Reefer Temperatures</span>
         </button>
 
-        <button onclick="navigatePage('page-hub', 'Navotas Facility Profile')" type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:bg-gcr-card hover:text-white border border-transparent hover:border-gcr-border transition text-left cursor-pointer">
-          <span class="text-base">🏢</span>
-          <span>Hub & Operations Profile</span>
+        <button onclick="navigatePage('page-hub', 'Facility Specifications')" type="button" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-white/[0.04] hover:text-white font-medium transition text-left cursor-pointer">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+          </svg>
+          <span>Hub Information</span>
         </button>
       </nav>
     </div>
 
-    <div class="p-4 border-t border-gcr-border/40 bg-black/30">
-      <p class="text-[11px] font-display font-bold text-white">GCR Food Products Trading</p>
-      <p class="text-[10px] text-slate-400">578 Gov. A. Pascual St., San Roque, Navotas</p>
-      <p class="text-[10px] text-gcr mt-1 font-mono font-semibold">📞 8634-7097</p>
+    <div class="p-3.5 border-t border-white/[0.08] bg-black/20 text-[11px] text-slate-400 space-y-0.5">
+      <p class="font-medium text-white">GCR Food Products Trading</p>
+      <p class="text-[10px]">Navotas Cold Chain Hub</p>
+      <p class="text-[10px] text-gcr font-mono pt-1">8634-7097</p>
     </div>
   </aside>
 
-  <div id="page-map" class="page-content flex-1 flex flex-col-reverse lg:grid lg:grid-cols-3 gap-3.5 sm:gap-5 p-3 sm:p-4 md:p-6 overflow-hidden min-h-0">
+  <div id="page-map" class="page-content flex-1 flex flex-col-reverse lg:grid lg:grid-cols-3 gap-3 p-3 sm:p-4 overflow-hidden min-h-0">
     
-    <section class="h-[220px] sm:h-[260px] lg:h-full space-y-2.5 sm:space-y-3 flex flex-col shrink-0 min-h-0">
+    <section class="h-[210px] sm:h-[250px] lg:h-full space-y-2 flex flex-col shrink-0 min-h-0">
       <div class="flex items-center justify-between px-1">
-        <h2 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-          <span class="h-2 w-2 rounded-full bg-gcr animate-ping"></span> Live Fleet Units
-        </h2>
-        <span id="truck-count" class="text-[10px] sm:text-xs glass-panel px-2.5 py-0.5 rounded-full text-gcr font-semibold">10 Active</span>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Reefer Telemetry</span>
+        <span id="truck-count" class="text-[10px] font-mono bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded text-gcr">10 ONLINE</span>
       </div>
 
-      <div id="fleet-list" class="space-y-2.5 flex-1 overflow-y-auto pr-1"></div>
+      <div id="fleet-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
     </section>
 
-    <section class="flex-1 lg:col-span-2 glass-panel p-2 rounded-2xl flex flex-col min-h-[300px] lg:min-h-0 shadow-2xl relative border border-gcr-border/40 overflow-hidden">
+    <section class="flex-1 lg:col-span-2 ui-panel p-2 rounded-xl flex flex-col min-h-[300px] lg:min-h-0 relative overflow-hidden">
       
-      <div class="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-[995] max-w-lg mx-auto">
-        <div class="glass-panel rounded-2xl p-1.5 sm:p-2 shadow-2xl border border-white/20 ring-1 ring-gcr/30 flex items-center gap-2">
-          <span class="text-gcr text-sm sm:text-base pl-2">🔍</span>
+      <div class="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-[995] max-w-md mx-auto">
+        <div class="ui-panel rounded-xl p-1.5 shadow-2xl flex items-center gap-2 border border-white/[0.12]">
+          <svg class="w-4 h-4 text-gcr ml-1.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
           <input 
             id="map-search-input" 
             type="text" 
-            placeholder="Search destination in PH (e.g. Balintawak, Cubao)..." 
-            class="w-full bg-transparent text-[11px] sm:text-xs text-white placeholder-slate-400 focus:outline-none py-1 px-1 font-medium"
+            placeholder="Search address in PH (e.g. Balintawak, Pasig)..." 
+            class="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none py-1 font-medium"
             onkeydown="if(event.key==='Enter') executeMapSearch()"
           />
           <button 
             onclick="executeMapSearch()" 
-            class="bg-gcr hover:bg-gcr-dark text-white font-bold text-xs px-3 py-1.5 rounded-xl transition shadow-md shadow-gcr/30 active:scale-95 cursor-pointer whitespace-nowrap"
+            class="bg-gcr hover:bg-gcr-dark text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer shrink-0"
           >
             Route
           </button>
         </div>
 
-        <div id="search-results-box" class="hidden glass-panel mt-1.5 rounded-xl border border-gcr-border shadow-2xl max-h-40 sm:max-h-48 overflow-y-auto divide-y divide-white/5"></div>
+        <div id="search-results-box" class="hidden ui-panel mt-1.5 rounded-xl border border-white/[0.08] shadow-2xl max-h-40 overflow-y-auto divide-y divide-white/[0.05]"></div>
       </div>
 
       <div id="map"></div>
     </section>
   </div>
 
-  <div id="page-driver-login" class="page-content hidden flex-1 max-w-md w-full mx-auto p-4 md:p-6 my-auto space-y-4">
-    <div class="glass-panel p-5 sm:p-7 rounded-2xl shadow-2xl space-y-4 sm:space-y-5 border border-gcr-border/40">
-      <div class="text-center space-y-1.5">
-        <div class="h-12 w-12 sm:h-14 sm:w-14 mx-auto rounded-2xl bg-gcr/20 border border-gcr/40 flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-gcr/20">
-          🔐
-        </div>
-        <h2 class="text-base sm:text-lg font-display font-extrabold text-white">Driver Portal Login</h2>
-        <p class="text-xs text-slate-400">Assigned vehicle & 8-digit passcode</p>
+  <div id="page-driver-login" class="page-content hidden flex-1 max-w-sm w-full mx-auto p-4 my-auto space-y-4">
+    <div class="ui-panel p-5 sm:p-6 rounded-2xl shadow-xl space-y-4 border border-white/[0.08]">
+      <div class="space-y-1">
+        <h2 class="text-base font-display font-bold text-white">Driver Verification</h2>
+        <p class="text-xs text-slate-400">Select assigned vehicle and 8-digit passcode</p>
       </div>
 
-      <div class="bg-black/40 p-3 rounded-xl border border-gcr-border/30 text-[11px] text-slate-300 space-y-1">
-        <p class="font-semibold text-gcr">ℹ️ Passcode Format:</p>
-        <p>Last 4 digits of phone + 4-digit birth year (e.g. <b>88211978</b> for REEFER-01).</p>
+      <div class="bg-white/[0.03] p-3 rounded-lg border border-white/[0.06] text-[11px] text-slate-300">
+        Format: Last 4 digits of phone + 4-digit birth year (e.g. <span class="font-mono text-gcr font-semibold">88211978</span>).
       </div>
 
-      <form id="form-driver-login" onsubmit="handleDriverLogin(event)" class="space-y-3.5">
+      <form id="form-driver-login" onsubmit="handleDriverLogin(event)" class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Assigned Unit</label>
-          <select id="login-truck-select" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gcr focus:outline-none">
-            <option value="REEFER-01">REEFER-01 (Plate: NDG-4421) — Danilo Brenio Sr.</option>
-            <option value="REEFER-02">REEFER-02 (Plate: CBC-8902) — Reynaldo Santos</option>
-            <option value="REEFER-03">REEFER-03 (Plate: TGC-1198) — Arnel Mendoza</option>
-            <option value="REEFER-04">REEFER-04 (Plate: NAL-5510) — Eduardo De Guzman</option>
-            <option value="REEFER-05">REEFER-05 (Plate: WAX-2041) — Marlon Bautista</option>
-            <option value="REEFER-06">REEFER-06 (Plate: NDO-7729) — Roberto Villanueva</option>
-            <option value="REEFER-07">REEFER-07 (Plate: CBA-3301) — Junar Delos Reyes</option>
-            <option value="REEFER-08">REEFER-08 (Plate: NDF-6184) — Joel Manansala</option>
-            <option value="REEFER-09">REEFER-09 (Plate: WBH-4890) — Christopher Ocampo</option>
-            <option value="REEFER-10">REEFER-10 (Plate: TGH-7734) — Ferdinand Soriano</option>
+          <label class="block text-xs text-slate-400 mb-1">Vehicle Unit</label>
+          <select id="login-truck-select" class="w-full bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
+            <option value="REEFER-01">REEFER-01 (NDG-4421) — Danilo Brenio Sr.</option>
+            <option value="REEFER-02">REEFER-02 (CBC-8902) — Reynaldo Santos</option>
+            <option value="REEFER-03">REEFER-03 (TGC-1198) — Arnel Mendoza</option>
+            <option value="REEFER-04">REEFER-04 (NAL-5510) — Eduardo De Guzman</option>
+            <option value="REEFER-05">REEFER-05 (WAX-2041) — Marlon Bautista</option>
+            <option value="REEFER-06">REEFER-06 (NDO-7729) — Roberto Villanueva</option>
+            <option value="REEFER-07">REEFER-07 (CBA-3301) — Junar Delos Reyes</option>
+            <option value="REEFER-08">REEFER-08 (NDF-6184) — Joel Manansala</option>
+            <option value="REEFER-09">REEFER-09 (WBH-4890) — Christopher Ocampo</option>
+            <option value="REEFER-10">REEFER-10 (TGH-7734) — Ferdinand Soriano</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">8-Digit Security Passcode</label>
+          <label class="block text-xs text-slate-400 mb-1">Passcode</label>
           <input 
             id="login-passcode" 
             type="password" 
             maxlength="8" 
             required 
             placeholder="••••••••" 
-            class="w-full bg-black/40 border border-gcr-border rounded-xl px-3.5 py-2.5 text-sm font-mono tracking-widest text-center text-white focus:border-gcr focus:outline-none placeholder-slate-600"
+            class="w-full bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-center text-white focus:border-gcr focus:outline-none"
           >
         </div>
 
-        <div id="login-error-msg" class="hidden text-xs text-rose-400 bg-rose-950/30 p-2.5 rounded-xl border border-rose-500/30 text-center font-medium"></div>
+        <div id="login-error-msg" class="hidden text-xs text-rose-400 bg-rose-950/40 p-2 rounded-lg border border-rose-500/20 text-center font-medium"></div>
 
-        <button type="submit" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-sky-500 to-gcr hover:from-sky-400 hover:to-gcr-dark text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-gcr/25 active:scale-98 cursor-pointer flex items-center justify-center gap-2">
-          <span>🔓</span> Enter Driver Cockpit
+        <button type="submit" class="w-full py-2.5 bg-gcr hover:bg-gcr-dark text-white font-semibold text-xs rounded-lg transition cursor-pointer">
+          Verify & Launch Cockpit
         </button>
       </form>
     </div>
   </div>
 
-  <div id="page-driver-cockpit" class="page-content hidden flex-1 max-w-xl w-full mx-auto p-3 sm:p-4 md:p-6 space-y-4 overflow-y-auto">
-    <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 border border-gcr-border/40">
-      <div class="flex items-center justify-between border-b border-gcr-border/40 pb-3">
+  <div id="page-driver-cockpit" class="page-content hidden flex-1 max-w-lg w-full mx-auto p-3 sm:p-4 space-y-3.5 overflow-y-auto">
+    <div class="ui-panel p-4 sm:p-5 rounded-xl space-y-3">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
         <div>
-          <span class="text-[9px] sm:text-[10px] uppercase font-bold text-gcr tracking-wider">Authenticated Unit</span>
-          <h2 id="cockpit-driver-name" class="text-sm sm:text-base font-display font-extrabold text-white">Driver Name</h2>
-          <p id="cockpit-truck-tag" class="text-xs text-slate-400">Unit: REEFER-01</p>
+          <span class="text-[10px] font-mono text-gcr uppercase tracking-wider">Active Session</span>
+          <h2 id="cockpit-driver-name" class="text-sm font-display font-bold text-white">Driver Name</h2>
+          <p id="cockpit-truck-tag" class="text-xs text-slate-400">Unit</p>
         </div>
-        <button onclick="handleDriverLogout()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/30 transition">
+        <button onclick="handleDriverLogout()" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:text-white transition">
           Sign Out
         </button>
       </div>
 
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-slate-300">Live GPS Broadcast</span>
-        <span id="gps-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-          GPS Offline
+      <div class="flex items-center justify-between pt-1">
+        <span class="text-xs text-slate-300">Live GPS Broadcast</span>
+        <span id="gps-status-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/[0.05] text-slate-400 border border-white/[0.08]">
+          STANDBY
         </span>
       </div>
 
-      <button id="btn-toggle-gps" class="w-full py-3.5 rounded-xl font-bold text-xs bg-gcr hover:bg-gcr-dark text-white shadow-lg shadow-gcr/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
-        <span>📡</span> Start Sharing Live GPS
+      <button id="btn-toggle-gps" class="w-full py-2.5 rounded-lg font-semibold text-xs bg-gcr hover:bg-gcr-dark text-white transition flex items-center justify-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 19.5v-.75a7.5 7.5 0 00-7.5-7.5H4.5m0-6.75h.75c7.87 0 14.25 6.38 14.25 14.25v.75M6 18.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+        <span>Broadcast GPS</span>
       </button>
 
-      <div id="driver-telemetry" class="hidden text-xs bg-black/40 p-3 rounded-xl border border-gcr-border/50 space-y-1 text-slate-300">
-        <p class="flex justify-between"><span>Current Coordinates:</span> <span id="telemetry-coords" class="font-mono text-gcr font-semibold">Detecting...</span></p>
-        <p class="flex justify-between"><span>Speed:</span> <span id="telemetry-speed" class="font-mono text-emerald-400 font-semibold">0 km/h</span></p>
+      <div id="driver-telemetry" class="hidden text-xs bg-black/40 p-2.5 rounded-lg border border-white/[0.06] space-y-1 text-slate-300 font-mono">
+        <p class="flex justify-between"><span>Position:</span> <span id="telemetry-coords" class="text-gcr">Searching...</span></p>
+        <p class="flex justify-between"><span>Speed:</span> <span id="telemetry-speed" class="text-emerald-400">0 km/h</span></p>
       </div>
     </div>
 
-    <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 border border-gcr-border/40">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Today's Delivery Stops Checklist</h3>
-      <div id="driver-stops-list" class="space-y-2.5"></div>
+    <div class="ui-panel p-4 sm:p-5 rounded-xl space-y-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Drop-Off Sequence</span>
+      <div id="driver-stops-list" class="space-y-2"></div>
     </div>
   </div>
 
-  <div id="page-operator" class="page-content hidden flex-1 max-w-3xl w-full mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
-    <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border border-gcr-border/40">
-      <div class="border-b border-gcr-border/40 pb-3 flex items-center justify-between">
+  <div id="page-operator" class="page-content hidden flex-1 max-w-2xl w-full mx-auto p-3 sm:p-4 space-y-4 overflow-y-auto">
+    <div class="ui-panel p-4 sm:p-6 rounded-xl space-y-4">
+      <div class="border-b border-white/[0.08] pb-3 flex items-center justify-between">
         <div>
-          <h2 class="text-sm sm:text-base font-display font-extrabold text-white flex items-center gap-1.5 sm:gap-2">
-            <span>📦</span> Trip Dispatch & Multi-Drop Manifest
-          </h2>
-          <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Assign cargo and destination drop points for any unit.</p>
+          <h2 class="text-sm sm:text-base font-display font-bold text-white">Trip Manifest</h2>
+          <p class="text-xs text-slate-400">Configure cold chain load and delivery sequence</p>
         </div>
-        <span class="text-[10px] sm:text-[11px] bg-gcr/10 text-gcr border border-gcr/30 px-2.5 py-0.5 rounded-full font-semibold">Navotas Central</span>
+        <span class="text-[10px] font-mono bg-white/[0.04] border border-white/[0.08] text-gcr px-2 py-0.5 rounded">NAVOTAS</span>
       </div>
 
-      <form id="form-operator-manifest" onsubmit="handleManifestSubmit(event)" class="space-y-3.5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <form id="form-operator-manifest" onsubmit="handleManifestSubmit(event)" class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Assign Reefer Unit</label>
-            <select id="man-truck-id" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
+            <label class="block text-xs text-slate-400 mb-1">Vehicle Unit</label>
+            <select id="man-truck-id" class="w-full bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
               <option value="REEFER-01">REEFER-01 (Plate: NDG-4421)</option>
               <option value="REEFER-02">REEFER-02 (Plate: CBC-8902)</option>
               <option value="REEFER-03">REEFER-03 (Plate: TGC-1198)</option>
@@ -367,79 +365,78 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Assigned Driver</label>
-            <input id="man-driver-name" type="text" value="Danilo Brenio Sr." readonly class="w-full bg-black/30 border border-gcr-border/40 rounded-xl px-3 py-2 text-xs text-slate-400 focus:outline-none">
+            <label class="block text-xs text-slate-400 mb-1">Driver</label>
+            <input id="man-driver-name" type="text" value="Danilo Brenio Sr." readonly class="w-full bg-black/30 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-slate-400 focus:outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Cargo Inventory Description</label>
-            <input id="man-cargo" type="text" required placeholder="e.g. 50 Cartons Frozen Bangus, 20 Sacks Tahong" class="w-full bg-black/40 border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
+            <label class="block text-xs text-slate-400 mb-1">Cargo Details</label>
+            <input id="man-cargo" type="text" required placeholder="e.g. 50 Cartons Frozen Bangus" class="w-full bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Target Temp Setpoint</label>
-            <select id="man-temp" class="w-full bg-slate-900 border border-gcr-border rounded-xl px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none">
-              <option value="-20.0">Deep Frozen (-20°C) — Fish Blocks, Meats</option>
-              <option value="-15.0">Standard Frozen (-15°C) — Squid & Shrimps</option>
-              <option value="2.0">Chilled (0°C to 4°C) — Live Tahong & Fresh Shells</option>
+            <label class="block text-xs text-slate-400 mb-1">Temperature Requirement</label>
+            <select id="man-temp" class="w-full bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-2 text-xs text-white focus:border-gcr focus:outline-none font-mono">
+              <option value="-20.0">-20.0°C (Frozen Seafood / Meats)</option>
+              <option value="-15.0">-15.0°C (Frozen Shellfish / Squid)</option>
+              <option value="2.0">+2.0°C (Chilled Shellfish / Fresh Catch)</option>
             </select>
           </div>
         </div>
 
-        <div class="border-t border-gcr-border/40 pt-3.5">
-          <div class="flex items-center justify-between mb-2.5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">Delivery Drop-Off Locations</label>
-            <button type="button" onclick="addStopInputRow()" class="text-[11px] sm:text-xs bg-gcr/15 border border-gcr/40 hover:bg-gcr text-gcr hover:text-white px-2.5 py-1 rounded-xl font-bold transition active:scale-95 cursor-pointer">
-              + Add Destination
+        <div class="border-t border-white/[0.08] pt-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Waypoints</span>
+            <button type="button" onclick="addStopInputRow()" class="text-xs text-gcr hover:text-white font-medium cursor-pointer">
+              + Add Stop
             </button>
           </div>
 
           <div id="stops-input-container" class="space-y-2">
             <div class="flex items-center gap-2 stop-row">
-              <span class="text-[11px] sm:text-xs text-gcr font-bold w-14 shrink-0">Stop 1:</span>
-              <input type="text" required placeholder="e.g. Balintawak Wholesale Market Bay 4" class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
-              <button type="button" onclick="removeStopRow(this)" class="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
-            </div>
-            <div class="flex items-center gap-2 stop-row">
-              <span class="text-[11px] sm:text-xs text-gcr font-bold w-14 shrink-0">Stop 2:</span>
-              <input type="text" placeholder="e.g. Munoz Wet Market Cold Store Stall #12" class="stop-name-input flex-1 bg-black/40 border border-gcr-border rounded-xl px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none placeholder-slate-500">
-              <button type="button" onclick="removeStopRow(this)" class="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg text-xs font-bold transition cursor-pointer">✕</button>
+              <span class="text-[11px] font-mono text-slate-400 w-12 shrink-0">Stop 1</span>
+              <input type="text" required placeholder="Balintawak Market Stall #14" class="stop-name-input flex-1 bg-slate-900 border border-white/[0.12] rounded-lg px-3 py-1.5 text-xs text-white focus:border-gcr focus:outline-none">
+              <button type="button" onclick="removeStopRow(this)" class="p-1 text-slate-400 hover:text-rose-400 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-sky-500 to-gcr hover:from-sky-400 hover:to-gcr-dark text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-gcr/25 active:scale-98 cursor-pointer flex items-center justify-center gap-2">
-          <span>🚀</span> Dispatch Reefer & Project Live Navigation
+        <button type="submit" class="w-full py-2.5 bg-gcr hover:bg-gcr-dark text-white font-semibold text-xs rounded-lg transition cursor-pointer">
+          Dispatch Fleet Route
         </button>
       </form>
     </div>
   </div>
 
-  <div id="page-coldchain" class="page-content hidden flex-1 max-w-5xl w-full mx-auto p-3 sm:p-4 md:p-6 space-y-4 overflow-y-auto">
-    <div class="glass-panel p-4 sm:p-6 rounded-2xl shadow-2xl border border-gcr-border/40">
-      <h2 class="text-sm sm:text-base font-display font-bold text-white">10-Truck Fleet Cold Chain Compliance</h2>
-      <p class="text-[11px] sm:text-xs text-slate-400 mb-4">Live digital telemetry sensors for frozen & chilled storage</p>
-      <div id="coldchain-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"></div>
+  <div id="page-coldchain" class="page-content hidden flex-1 max-w-4xl w-full mx-auto p-3 sm:p-4 space-y-3 overflow-y-auto">
+    <div class="ui-panel p-4 sm:p-5 rounded-xl space-y-3">
+      <div class="border-b border-white/[0.08] pb-2">
+        <h2 class="text-sm font-display font-bold text-white">Reefer Telemetry Status</h2>
+        <p class="text-xs text-slate-400">Digital temperature compliance monitoring across 10 units</p>
+      </div>
+      <div id="coldchain-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
     </div>
   </div>
 
-  <div id="page-hub" class="page-content hidden flex-1 max-w-3xl w-full mx-auto p-3 sm:p-4 md:p-6 space-y-4 overflow-y-auto">
-    <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-2xl space-y-4 border border-gcr-border/40">
-      <div class="flex items-center gap-3 sm:gap-4 border-b border-gcr-border/40 pb-4">
-        <div class="h-14 sm:h-16 px-3 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg border border-white/20 shrink-0">
-          <img src="logo.jpg" alt="GCR Food Products" class="h-10 sm:h-12 w-auto object-contain" />
+  <div id="page-hub" class="page-content hidden flex-1 max-w-2xl w-full mx-auto p-3 sm:p-4 space-y-3 overflow-y-auto">
+    <div class="ui-panel p-5 rounded-xl space-y-4">
+      <div class="flex items-center gap-3 border-b border-white/[0.08] pb-3">
+        <div class="h-12 px-2.5 bg-white rounded-lg flex items-center justify-center border border-white/20 shrink-0">
+          <img src="logo.jpg" alt="GCR Logo" class="h-8 w-auto object-contain" />
         </div>
         <div>
-          <h2 class="text-base sm:text-lg font-display font-extrabold text-white">GCR Food Products Trading</h2>
-          <p class="text-[11px] sm:text-xs text-gcr font-medium">Seafood, Shells & Quality Meats Logistics</p>
+          <h2 class="text-base font-display font-bold text-white">GCR Food Products Trading</h2>
+          <p class="text-xs text-slate-400">Cold Chain Logistics Operations</p>
         </div>
       </div>
-      <div class="text-xs text-slate-300 space-y-2.5 pt-1">
-        <p class="flex items-start gap-2">📍 <span><b class="text-white">Hub:</b> 578 Gov. A. Pascual St., San Roque, Navotas City</span></p>
-        <p class="flex items-center gap-2">📧 <span><b class="text-white">Email:</b> gcrfoodproducts@gmail.com</span></p>
-        <p class="flex items-center gap-2">☎️ <span><b class="text-white">Dispatch:</b> 8634-7097</span></p>
-        <p class="flex items-start gap-2">🕒 <span><b class="text-white">Operations:</b> 24/7 Navotas Fish Port Inbound Cold Chain Delivery</span></p>
+      <div class="text-xs text-slate-300 space-y-2">
+        <p class="flex justify-between border-b border-white/[0.04] pb-1.5"><span class="text-slate-400">Facility Location</span> <span>578 Gov. A. Pascual St., San Roque, Navotas</span></p>
+        <p class="flex justify-between border-b border-white/[0.04] pb-1.5"><span class="text-slate-400">Direct Inquiries</span> <span class="font-mono">gcrfoodproducts@gmail.com</span></p>
+        <p class="flex justify-between border-b border-white/[0.04] pb-1.5"><span class="text-slate-400">Dispatch Wire</span> <span class="font-mono text-gcr">8634-7097</span></p>
+        <p class="flex justify-between"><span class="text-slate-400">Operational Hours</span> <span>24/7 Navotas Fish Port Dispatch</span></p>
       </div>
     </div>
   </div>
@@ -458,6 +455,6 @@
     }
   </script>
 
-  <script src="app.js?v=8.0"></script>
+  <script src="app.js?v=9.0"></script>
 </body>
 </html>
